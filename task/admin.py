@@ -1,3 +1,4 @@
 from django.contrib import admin
+from .models import Do, Program, Task, CompleteTask
 
-# Register your models here.
+admin.site.register([Do, Program, Task, CompleteTask])
