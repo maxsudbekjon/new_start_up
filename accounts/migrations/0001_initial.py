@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('username', models.CharField(max_length=255, unique=True)),
-                ('phone', models.CharField(blank=True, max_length=255, null=True, unique=True, validators=[django.core.validators.RegexValidator(message='Telefon raqami +998 bilan boshlanib, jami 13 ta raqamdan iborat bo‘lishi kerak (masalan: +998901254456)', regex='^\\+998\\d{9}$')])),
+                ('phone', models.CharField(max_length=255, unique=True, validators=[django.core.validators.RegexValidator(message='Telefon raqami +998 bilan boshlanib, jami 13 ta raqamdan iborat bo‘lishi kerak (masalan: +998901254456)', regex='^\\+998\\d{9}$')])),
                 ('level', models.CharField(blank=True, choices=[('initial', "Boshlang'ich"), ('medium', "O'rta"), ('high', 'Yuqori')], max_length=255, null=True)),
                 ('is_active', models.BooleanField(default=False)),
                 ('is_verified', models.BooleanField(default=False)),
