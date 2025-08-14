@@ -7,5 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path("chaining/", include("smart_selects.urls")),
+
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
