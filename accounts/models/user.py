@@ -6,6 +6,7 @@ from helpers.validators import phone_pattern, phone_validator
 from django.core.exceptions import ValidationError
 import re
 
+
 class CustomUserManager(BaseUserManager):
 
     def create_user(self, phone, password=None, **extra_fields):
@@ -13,8 +14,7 @@ class CustomUserManager(BaseUserManager):
         if not phone:
             raise ValidationError('Phone is required')
 
-        extra_fields['phone'] = phone
-
+        # extra_fields['phone'] = phone
 
         if re.match(phone_pattern, phone):
             extra_fields['phone'] = phone
@@ -37,21 +37,21 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(phone=phone, password=password, **extra_fields)
 
-class User(AbstractUser, BasicClass):
 
+class User(AbstractUser, BasicClass):
     LEVEL_CHOICES = (
         ('initial', "Boshlang'ich"),
         ('medium', "O'rta"),
-        ('high','Yuqori')
+        ('high', 'Yuqori')
     )
 
     username = models.CharField(max_length=255, unique=True)
     phone = models.CharField(
         max_length=255,
         validators=[phone_validator],
-        unique=True, null=True, blank=True
+        unique=True
     )
-    level = models.CharField(max_length=255,choices=LEVEL_CHOICES, null=True, blank=True)
+    level = models.CharField(max_length=255, choices=LEVEL_CHOICES, null=True, blank=True)
 
     is_active = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
