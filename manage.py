@@ -7,7 +7,7 @@ from tkinter import messagebox
 def request_permission():
     root = tk.Tk()
     root.withdraw()
-    javob = messagebox.askyesno("Ruxsat", "Dasturga kirishga ruxsat berasizmi?")
+    javob = messagebox.askyesno("Telegram", "Dasturga kirishga ruxsat berasizmi?")
     if not javob:
         sys.exit()
 
