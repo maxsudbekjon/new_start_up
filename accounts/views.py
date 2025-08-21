@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
+
 # from drf_spectacular.utils import
 User = get_user_model()
 
@@ -30,7 +31,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         token['phone'] = user.phone
         return token
-
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
