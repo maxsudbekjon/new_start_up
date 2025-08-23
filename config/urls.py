@@ -10,6 +10,7 @@ urlpatterns = [
     path("chaining/", include("smart_selects.urls")),
 
     path('accounts/', include('accounts.urls')),
+    path('task/', include('task.urls')),
 
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
