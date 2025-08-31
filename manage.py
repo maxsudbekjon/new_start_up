@@ -1,22 +1,12 @@
+#!/usr/bin/env python
+"""Django's command-line utility for administrative tasks."""
 import os
 import sys
 
-import tkinter as tk
-from tkinter import messagebox
-
-def request_permission():
-    root = tk.Tk()
-    root.withdraw()
-    javob = messagebox.askyesno("Telegram", "Dasturga kirishga ruxsat berasizmi?")
-    if not javob:
-        sys.exit()
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-
-    request_permission()
-
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -30,3 +20,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    
