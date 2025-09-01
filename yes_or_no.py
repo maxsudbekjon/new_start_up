@@ -1,73 +1,105 @@
-import psutil
-import time
-import tkinter as tk
-import os
-import threading
-import pygetwindow as gw  # pip install pygetwindow
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.clock import Clock
+from jnius import autoclass, JavaException
+from android.permissions import request_permissions, Permission
 
-blocked_apps = ['telegram.exe']
-already_asked = set()
+# Android API
+PythonActivity = autoclass('org.kivy.android.PythonActivity')
+Context = autoclass('android.content.Context')
+UsageStatsManager = autoclass('android.app.usage.UsageStatsManager')
+System = autoclass('java.lang.System')
 
-
-def show_popup(app_name, exe_path):
-    def on_yes():
-        already_asked.add(exe_path)
-        if exe_path and os.path.exists(exe_path):
-            try:
-                os.startfile(exe_path)
-                print(f"{app_name} qayta ishga tushirildi.")
-            except Exception as e:
-                print(f"{app_name} ni qayta ochishda xatolik: {e}")
-        root.destroy()
-
-    def on_no():
-        print(f"{app_name} bloklandi.")
-        root.destroy()
-
-    root = tk.Tk()
-    root.title("Diqqat!")
-    root.geometry("350x150")
-    root.attributes("-topmost", True)
-
-    tk.Label(root, text=f"'{app_name}' ilovasiga kirishni rostan ham xohlaysizmi?",
-             wraplength=300).pack(pady=20)
-    tk.Button(root, text="Ha", width=10, command=on_yes).pack(side="left", padx=50, pady=10)
-    tk.Button(root, text="Yo‘q", width=10, command=on_no).pack(side="right", padx=50, pady=10)
-
-    root.mainloop()
+# Kuzatiladigan ilovalar
+watched_apps = {
+    "com.instagram.android": "Insstagram",
+    "com.zhiliaoapp.musically": "TikTok",
+    "org.telegram.messenger": "Telegram"
+}
 
 
-def monitor_apps():
-    while True:
-        for proc in psutil.process_iter(['pid', 'name', 'exe']):
-            try:
-                pname = proc.info['name']
-                exe_path = proc.info['exe']
+def get_foreground_app():
+    """Hozirgi ochilgan ilovani aniqlash"""
+    try:
+        context = PythonActivity.mActivity.getApplicationContext()
+        usm = context.getSystemService(Context.USAGE_STATS_SERVICE)
 
-                if not pname or not exe_path:
-                    continue
+        if usm is None:
+            return None, "❌ UsageStatsManager mavjud emas (Permission yo‘q)"
 
-                if pname.lower() in blocked_apps:
-                    # ❗ faqat oyna ochilganda tekshirish
-                    windows = gw.getWindowsWithTitle("Telegram")
-                    if windows and exe_path not in already_asked:
-                        print(f"{pname} oynasi ochildi, ruxsat so‘ralmoqda.")
+        end = System.currentTimeMillis()
+        begin = end - 1000 * 10
+        stats = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, begin, end)
 
-                        try:
-                            proc.terminate()
-                            proc.wait(timeout=3)
-                        except Exception as e:
-                            print(f"O‘chirishda xatolik: {e}")
+        if not stats:
+            return None, "⚠️ Usage stats bo‘sh (Permission berilmagan bo‘lishi mumkin)"
 
-                        threading.Thread(target=show_popup,
-                                         args=(pname, exe_path),
-                                         daemon=True).start()
+        recent_app = None
+        last_time = 0
 
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                continue
+        for usage in stats.toArray():
+            if usage.getLastTimeUsed() > last_time:
+                last_time = usage.getLastTimeUsed()
+                recent_app = usage.getPackageName()
 
-        time.sleep(1)
+        return recent_app, None
+
+    except JavaException as e:
+        return None, f"JavaException: {e}"
+    except Exception as e:
+        return None, f"Exception: {e}"
+
+
+class MyApp(App):
+    def build(self):
+        # Permission olish
+        request_permissions([Permission.PACKAGE_USAGE_STATS])
+
+        self.layout = BoxLayout(orientation='vertical')
+        self.label = Label(text="Ilovaga kirishga ruxsat berasizmi?", font_size=20)
+        self.status_label = Label(text="", font_size=16)
+
+        btn_yes = Button(text="Ha", font_size=18)
+        btn_no = Button(text="Yo'q", font_size=18)
+
+        btn_yes.bind(on_press=self.allow_access)
+        btn_no.bind(on_press=self.deny_access)
+
+        self.layout.add_widget(self.label)
+        self.layout.add_widget(btn_yes)
+        self.layout.add_widget(btn_no)
+        self.layout.add_widget(self.status_label)
+
+        return self.layout
+
+    def allow_access(self, instance):
+        self.label.text = "✅ Monitoring boshlandi"
+        # Har 2 soniyada update bo‘lsin
+        self.event = Clock.schedule_interval(self.update_status, 2)
+
+    def deny_access(self, instance):
+        self.label.text = "❌ Siz rad qildingiz. Ilova yopilmoqda..."
+        Clock.schedule_once(lambda dt: App.get_running_app().stop(), 1)
+
+    def update_status(self, dt):
+        app, error = get_foreground_app()
+
+        if error:
+            self.status_label.text = error
+            return
+
+        if app in watched_apps:
+            self.status_label.text = f"📱 {watched_apps[app]} ochildi"
+        else:
+            self.status_label.text = f"Hozirgi app: {app}" if app else "App aniqlanmadi"
+
+    def on_stop(self):
+        # Ilova yopilganda monitoringni to‘xtatish
+        if hasattr(self, "event"):
+            self.event.cancel()
 
 
 if __name__ == "__main__":
-    monitor_apps()
+    MyApp().run()
