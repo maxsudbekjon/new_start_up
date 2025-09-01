@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from task.models.do import Do
+from task.models.task import Do
+
 
 class DoSerializer(serializers.ModelSerializer):
     class Meta:
