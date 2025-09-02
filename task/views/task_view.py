@@ -23,8 +23,8 @@ class ListTaskAPIView(APIView):
     def get(self, request):
         tasks = Task.objects.filter(user=request.user)
 
-        if not tasks.exists():
-            return Response({"message": "you have not any task.!"}, status=404)
+        # if not tasks.exists():
+        #     return Response({"message": "you have not any task.!"}, status=404)
 
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)
