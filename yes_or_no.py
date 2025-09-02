@@ -5,7 +5,7 @@ from kivy.uix.button import Button
 from kivy.clock import Clock
 from jnius import autoclass, JavaException
 from android.permissions import request_permissions, Permission
-
+#
 # Android API
 PythonActivity = autoclass('org.kivy.android.PythonActivity')
 Context = autoclass('android.content.Context')
