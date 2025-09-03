@@ -53,9 +53,6 @@ class User(AbstractUser, BasicClass):
     )
     level = models.CharField(max_length=255, choices=LEVEL_CHOICES, null=True, blank=True)
 
-    is_active = models.BooleanField(default=False)
-    is_verified = models.BooleanField(default=False)
-
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = []
 
