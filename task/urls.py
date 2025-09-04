@@ -1,12 +1,13 @@
 from django.urls import path
-from task.views.complate_view import AddCompleteTaskAPIView
+from task.views.complate_view import AddCompleteTaskAPIView, GetAllCompleteTaskAPIView
 from task.views.do_view import AddDoAPIView, ListDoAPIView
 from task.views.program_view import AddProgramAPIView, ListProgramAPIView
 from task.views.task_view import AddTaskAPIView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
 
 
 urlpatterns = [
-    path('complete_task/', view=AddCompleteTaskAPIView.as_view()),
+    path('add_complete_task/', view=AddCompleteTaskAPIView.as_view()),
+    path('list_complete_task/', GetAllCompleteTaskAPIView.as_view()),
 
     path('add_do/', AddDoAPIView.as_view()),
     path('get_do_list/', ListDoAPIView.as_view()),

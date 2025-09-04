@@ -17,8 +17,12 @@ class AddCompleteTaskAPIView(APIView):
         return Response(serializer.errors, status=400)
 
 
-# class GetAllCompleteTaskAPIView(APIView):
-#     permission_classes = [IsAuthenticated]
-#
-#     def get(self, request):
-#         complete_tasks = CompleteTask.objects.filters()
+class GetAllCompleteTaskAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        complete_tasks = CompleteTask.objects.filter(task__user=request.user)
+
+        serializer = CompleteTaskSerializer(complete_tasks, many=True)
+        return Response(serializer.data, status=200)
