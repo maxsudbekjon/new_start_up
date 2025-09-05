@@ -7,6 +7,7 @@ class CompleteTaskSerializer(serializers.ModelSerializer):
         model = CompleteTask
         fields = (
             'id',
+            'user',
             'task',
             'completed_at'
         )

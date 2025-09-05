@@ -1,4 +1,6 @@
 from .base import *
+from datetime import date, timedelta
+from django.conf import settings
 
 
 class Program(BasicClass):
@@ -27,5 +29,5 @@ class Task(BasicClass):
     is_complete = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title.title
+        return str(self.title)
 
