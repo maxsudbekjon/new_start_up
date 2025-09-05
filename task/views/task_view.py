@@ -3,30 +3,43 @@ from rest_framework.response import Response
 from task.serializers.task_serializer import TaskSerializer
 from rest_framework.permissions import IsAuthenticated
 from task.models.task import Task
+from task.models.complete_task import CompleteTask
+from task.utils import calculate_streak
 
 
 class AddTaskAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = TaskSerializer(data=request.data)
-        user_age = request.user.age
+        serializer = TaskSerializer(data=request.data, context={"request": request})
+
         if serializer.is_valid(raise_exception=True):
-            validated = serializer.validated_data
+            user_age = request.user.age
+            count = serializer.validated_data.get('count')
+            a = 5
+            b = 10
+            c = 15
+            completions = (
+                CompleteTask.objects.filter(user=request.user).order_by("completed_at").values_list("completed_at", flat=True)
+            )
 
-            if user_age <= 10:
-                if validated.get('count') > 5:
-                    return Response({"error": "5 ga teng yoki kichik raqam kiriting.!"}, status=400)
-            elif user_age > 10 and user_age < 20:
-                if validated.get('count') > 10:
-                    return Response({"error": "10 ga teng yoki kichik raqam kiriting.!"}, status=400)
+            max_value = calculate_streak(list(completions))
 
-            elif user_age >= 20:
-                if validated.get('count') > 15:
-                    return Response({"error": "15 ga teng yoki kichik raqam kiriting.!"}, status=400)
+            if max_value >= 1:
+                a += 3
+                b += 3
+                c += 3
 
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=201)
+            if user_age <= 10 and count > a:
+                return Response({"message": f"10 yoshdan kichiklar uchun maksimal {a}"})
+            elif 10 < user_age < 20 and count > b:
+                return Response({"message": f"10 va 19 yoshgacha maksimal {b}"})
+            elif user_age >= 20 and count > c:
+                return Response({"message": f"20 yoshdan kattalar uchun maksimal {c}"})
+
+            task = serializer.save(user=request.user)
+            return Response(TaskSerializer(task).data, status=201)
+
         return Response(serializer.errors, status=400)
 
 
