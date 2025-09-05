@@ -10,8 +10,21 @@ class AddTaskAPIView(APIView):
 
     def post(self, request):
         serializer = TaskSerializer(data=request.data)
-
+        user_age = request.user.age
         if serializer.is_valid(raise_exception=True):
+            validated = serializer.validated_data
+
+            if user_age <= 10:
+                if validated.get('count') > 5:
+                    return Response({"error": "5 ga teng yoki kichik raqam kiriting.!"}, status=400)
+            elif user_age > 10 and user_age < 20:
+                if validated.get('count') > 10:
+                    return Response({"error": "10 ga teng yoki kichik raqam kiriting.!"}, status=400)
+
+            elif user_age >= 20:
+                if validated.get('count') > 15:
+                    return Response({"error": "15 ga teng yoki kichik raqam kiriting.!"}, status=400)
+
             serializer.save(user=request.user)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
@@ -22,9 +35,6 @@ class ListTaskAPIView(APIView):
 
     def get(self, request):
         tasks = Task.objects.filter(user=request.user)
-
-        # if not tasks.exists():
-        #     return Response({"message": "you have not any task.!"}, status=404)
 
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data)

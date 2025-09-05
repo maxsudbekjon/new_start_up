@@ -12,6 +12,8 @@ class TaskSerializer(serializers.ModelSerializer):
             'program',
             'count',
             'duration',
-            'is_active'
+            'is_active',
+            "is_complete",
+
         )
         read_only_fields = ['user']

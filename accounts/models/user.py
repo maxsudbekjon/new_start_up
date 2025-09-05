@@ -51,6 +51,7 @@ class User(AbstractUser, BasicClass):
         validators=[phone_validator],
         unique=True
     )
+    age = models.IntegerField(default=0)
     level = models.CharField(max_length=255, choices=LEVEL_CHOICES, null=True, blank=True)
 
     is_active = models.BooleanField(default=False)
