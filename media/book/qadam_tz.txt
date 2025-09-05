@@ -1,0 +1,70 @@
+                                                            TZ
+------------------------------------------------------------------
+Loyiha nomi: Qadam
+Kimlar uchun: Asosiy urg'u yoshlarga
+Loyihaning maqsadi: Odat shakillantirishda yordam berish
+
+------------------------------------------------------------------
+
+Asosiy g'oya: Loyiha yordamida siz yangi odatlarni shakillantirishiz mumkin. Bevosita ijtimoiy tarmoqlardan foydalangan holatda.Loyiha o'zida yangi(yaxshi) odat shakillantirmoqchi bo'lgan barcha uchun.
+Asosiy foydalanuvchi rollari: user(default),admin
+
+------------------------------------------------------------------
+
+Funksional talablar
+    Kirish: Foydalanuvchi ro'yxatdan o'tishi unda userdan phone_number , username va password so'raladi holos.
+    Bosh sahifa: Foydalanuvchining bugun qilgan mashqlar soni va shu mashqalar uchun sarflagan vaqti.
+    Ilovalar: Barcha tasklar ro'yxati (userga tegishli bo'lgan)
+    Ilovalar: Istalgan task ni update qilish imkoniyati, yoki, istalgan taskni o'chirish imkoniyati bo'ladi.
+    Ilovalar: Yangi task qo'shish imkoniti.
+        Ilova tanlash: Biz kiritgan ilovalardan tanlay oladi holos
+        Mashq turini tanlash: Bu yerda biz taklif qilgandan tashqari o'zi ham task qo'shishi mumkin(u qo'shgan mashq orqali ham task yaratish) #### DONE.........
+
+				### hozircha pastdi qilish kerak###
+            Vocab: qaysi tilda ekanini tanlashi kerak
+                Tillar: faqat biz kiritgan tillarni tanlay oladi(ingliz,rus,turk,arab).
+            Kitob: qaysi kitobligini tanlashi kerak
+                Kitoblar: faqat biz kiritgan kitoblar ro'yxatidan tanlay oladi.
+        Sonini tanlash: Mashqni nechchi marta qilishini kiritadi. Mashq sonini tanlashda raqamlar filter asosida chiqadi.
+            1-filter: Agar foydalanuvchi yoshi 10 yoshdan kichik bo'lsa 1 kunda max=5, 10<age<20 bo'lsa max=10, 20<age bo'lsa max=15 ta mashq qilishiga imkon berish
+            2-filter: Agar foydalanuvchi shu vaqtgacha birorta taskni 30 kundan ortiq qilgan bo'lsa va yangi task qo'shmoqchi bo'lsa sondagi cheklov 3 ga oshishi kerak.(qanday task qilgani muhim emas muhimi 30 kun yoki undan ko'proq vaqt qilgan bo'lsa bo'ldi.)
+				#### hozircha tepasini qilish kerak###
+
+
+        Takrorlanishi: Mashqlar bir kunda nechchi soatda takrorlanishi.(misol INSTAGRAM dan 3 soat foydalangandan keyin).Tashkrorlanishni tanlashda filterlar bor.
+            1-filter: Agar foydalanuvchi yoshi 10 yoshdan kichik bo'lsa 1 kunda 24 soat(ya'ni 1 kunda 1 marta takrorlanadi), 10<age<20 bo'lsa 2 marta takrorlanish, 20<age bo'lsa 4 marta takrorlanish
+            2-filter: Agar foydalanuvchi shu vaqtgacha birorta taskni 30 kundan ortiq qilgan bo'lsa va yangi task qo'shmoqchi bo'lsa takrorlanishdagi cheklov 1 taga oshishi kerak.(qanday task qilgani muhim emas muhimi 30 kun yoki undan ko'proq vaqt qilgab bo'lsa bo'ldi.)
+    Statistika: Statistika 3 ga bo'linadi
+        Haftalaik statistika: Bu yerda foydalanuvchining har kunlik complate_task lar soni
+        Oylik: Bu yerda foydalanuvchining har bir haftadagi complate_task lar soni
+        Yillik: Bu yerda foydalanuvchining har bir oydagi complate_task lar soni
+    Sozlamalar: Foydalanuvchu malumotlar(image, age, phone_number, username, reting),bildirishnomalar, qorong'u rejim.
+    Reting: 
+
+        1: 10 ta eng yuqori bal yig'gan foydalanuvchilar ro'yxati(to'g'ri tartiblanga holatda).11-sifati foydalanuvchilarga tegishli malumot
+        2: 1 oylik ballarni hisoblab eng yuqori bal to'plagan 10 odam ro'yxati. 11-sifati foydalanuvchining malumotlari
+        3: Eng ko'p vaqt davomida tasklardagi davomiylikni uzmasdan kelayotgan 10 ta foydalanuvhi ro'yxato (5 task biriktirib 1 tasini doimiy qilib kelayotgan bo'lsa ham kiradi). 11-sifati foydalanuvchining malumotlari
+    Tasklar: Ilovadan tashqarida foydalanuvchi taskka biriktirga  ilovaga kirsa avtomatik taskka biriktirilgan mashg'ulot api orqali qaytishi kerak.(agar opencv-python ga doir mashq bo'lsa kamer ochilishi kerak)
+
+------------------------------------------------------------------
+
+
+Nofunksional talablar  
+
+Tezlik: Ilova qo'shishdagi < sonini tanlash > , <takrorlanishi>, Reting dagi reting malumotlarini kabi joylarda filterlar ko'p vaqtni olmasligi zarur.
+Xavfsizlik: User ga tegishli password shifrlanishi lozim.
+Ishonchlilik: 1 ta post api orqali foydalanuvchialrda tug'ilyotgan muammolarni yozib ketish imkonini berish
+
+------------------------------------------------------------------
+
+
+
+Texnologiyalar: DRF,Postgresql,Flutter,OPENCV-Python
+
+
+------------------------------------------------------------------
+
+
+Muddat: 1 oy
+
+

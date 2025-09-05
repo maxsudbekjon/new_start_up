@@ -5,16 +5,16 @@ from task.models import CompleteTask
 from task.serializers.complete_task_serializer import CompleteTaskSerializer
 
 
-class AddCompleteTaskAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        serializer = CompleteTaskSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+# class AddCompleteTaskAPIView(APIView):
+#     permission_classes = [IsAuthenticated]
+#
+#     def post(self, request):
+#         serializer = CompleteTaskSerializer(data=request.data)
+#
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(serializer.data, status=201)
+#         return Response(serializer.errors, status=400)
 
 
 class GetAllCompleteTaskAPIView(APIView):

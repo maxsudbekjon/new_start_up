@@ -23,7 +23,9 @@ class Task(BasicClass):
     program = models.ForeignKey('task.Program', on_delete=models.CASCADE, verbose_name='program', related_name='tasks')
     count = models.IntegerField(default=0)
     duration = models.CharField(max_length=150)
-
+    is_active = models.BooleanField(default=False)
+    is_complete = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.title
+        return self.title.title
+

@@ -8,13 +8,14 @@ User = get_user_model()
 
 class CustomUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
+    age = serializers.CharField(required=True)
     phone = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
     password = serializers.CharField(required=True, write_only=True, validators=[validate_password])
     password2 = serializers.CharField(required=True, write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'phone', 'password', 'password2']
+        fields = ['id', 'username', 'age', 'phone', 'password', 'password2']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
