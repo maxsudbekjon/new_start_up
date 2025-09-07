@@ -66,3 +66,5 @@ class User(AbstractUser, BasicClass):
 
     def __str__(self):
         return f"{self.phone}"
+
+
