@@ -4,9 +4,11 @@ from .models import Rating
 from .models.user import *
 from .models.profile import *
 
+
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ('id', 'username', 'phone', 'is_active')
+
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
@@ -17,13 +19,15 @@ class ProfileAdmin(admin.ModelAdmin):
         'birth_date',
         'status'
 
-                    )
+    )
+
 
 @admin.register(Rating)
 class RatingAdmin(admin.ModelAdmin):
     list_display = (
-        'id','point','user_profile'
+        'id', 'point', 'user_profile'
     )
+
 
 @admin.register(District)
 class DistrictAdmin(admin.ModelAdmin):
@@ -32,6 +36,7 @@ class DistrictAdmin(admin.ModelAdmin):
         'region',
         'name'
     )
+
 
 @admin.register(Region)
 class RegionAdmin(admin.ModelAdmin):

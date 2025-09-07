@@ -82,3 +82,5 @@ class DeleteTaskAPIView(APIView):
             return Response({"message": "task deleted successfully"}, status=200)
         except Task.DoesNotExist:
             return Response({"error": "task not found"}, status=404)
+
+
