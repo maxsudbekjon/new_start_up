@@ -1,6 +1,5 @@
 from .base import *
-from datetime import date, timedelta
-from django.conf import settings
+from vocab.models.language import Language
 
 
 class Program(BasicClass):
@@ -13,6 +12,7 @@ class Program(BasicClass):
 
 class Do(BasicClass):
     title = models.CharField(max_length=255)
+    language = models.ForeignKey(Language, on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):

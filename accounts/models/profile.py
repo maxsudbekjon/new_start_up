@@ -7,7 +7,7 @@ from .location import *
 
 
 class Profile(models.Model):
-    user = models.OneToOneField('User', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
     birth_date = models.DateField(null=True, blank=True)
     bio = RichTextField()
@@ -26,7 +26,7 @@ class Profile(models.Model):
 def create_user_profile(sender, instance, created, **kwargs):
     user = instance
 
-    if user.is_active:
+    if created and user.is_active:
         Profile.objects.get_or_create(
             user=user,
             bio="this is my bio",
