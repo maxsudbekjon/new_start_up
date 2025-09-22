@@ -8,9 +8,8 @@ __pycache__/
 .idea/
 
 #migration files
-accounts/migrations
-task/migrations
-vocab/migrations
+*/migrations/*.py
+!*/migrations/__init__.py
 
 logs
 
