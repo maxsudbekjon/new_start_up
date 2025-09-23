@@ -51,7 +51,15 @@ services:
       - db
       - redis
       - mq
-
+  nginx:
+    image: nginx:latest
+    container_name: qadam_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
   celery:
     build:
       context: .
