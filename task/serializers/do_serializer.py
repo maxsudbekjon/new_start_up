@@ -3,6 +3,7 @@ from task.models.task import Do
 
 
 class DoSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Do
-        fields = ('id', 'title', 'description')
+        fields = ('id', 'title', 'description', "language")
