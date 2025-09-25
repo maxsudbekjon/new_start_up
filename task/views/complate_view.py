@@ -4,21 +4,23 @@ from rest_framework.permissions import IsAuthenticated
 from task.models import CompleteTask
 from task.serializers.complete_task_serializer import CompleteTaskSerializer
 from django.utils.dateparse import parse_date
+from drf_spectacular.utils import extend_schema
+from rest_framework import generics
 
 
-class GetAllCompleteTaskAPIView(APIView):
+@extend_schema(tags=["Complate Tasks"])
+class GetAllCompleteTaskAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = CompleteTaskSerializer
+    queryset = CompleteTask.objects.all()
 
-    def get(self, request):
+    def get_queryset(self):
+        return self.queryset.filter(task__user=self.request.user)
 
-        complete_tasks = CompleteTask.objects.filter(task__user=request.user)
-
-        serializer = CompleteTaskSerializer(complete_tasks, many=True)
-        return Response(serializer.data, status=200)
-
-
-class CompleteTaskStatisticsAPIView(APIView):
+@extend_schema(tags=["Complate Tasks"])
+class CompleteTaskStatisticsAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = CompleteTaskSerializer
 
     def get(self, request):
         user = request.user
@@ -28,26 +30,23 @@ class CompleteTaskStatisticsAPIView(APIView):
 
         queryset = CompleteTask.objects.filter(user=user)
 
-        # Kunlik statistika
         if date:
             queryset = queryset.filter(completed_at__date=parse_date(date))
-            serializer = CompleteTaskSerializer(queryset, many=True)
+            serializer = self.get_serializer(queryset, many=True)
             return Response({
                 "type": "daily",
                 "date": date,
-                "tasks": serializer.data,  # yoki serializer ishlatish mumkin
+                "tasks": serializer.data,
                 "count": queryset.count()
             })
 
-        # Oylik statistika
         elif month:
             year, month_num = month.split("-")
             queryset = queryset.filter(
                 completed_at__year=int(year),
                 completed_at__month=int(month_num)
             )
-            serializer = CompleteTaskSerializer(queryset, many=True)
-
+            serializer = self.get_serializer(queryset, many=True)
             return Response({
                 "type": "monthly",
                 "month": month,
@@ -55,11 +54,9 @@ class CompleteTaskStatisticsAPIView(APIView):
                 "count": queryset.count()
             })
 
-        # Yillik statistika
         elif year:
             queryset = queryset.filter(completed_at__year=int(year))
-            serializer = CompleteTaskSerializer(queryset, many=True)
-
+            serializer = self.get_serializer(queryset, many=True)
             return Response({
                 "type": "yearly",
                 "year": year,
