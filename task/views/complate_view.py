@@ -6,7 +6,7 @@ from task.serializers.complete_task_serializer import CompleteTaskSerializer
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 @extend_schema(tags=["Complate Tasks"])
 class GetAllCompleteTaskAPIView(generics.ListAPIView):
@@ -18,10 +18,18 @@ class GetAllCompleteTaskAPIView(generics.ListAPIView):
         return self.queryset.filter(task__user=self.request.user)
 
 @extend_schema(tags=["Complate Tasks"])
-class CompleteTaskStatisticsAPIView(generics.GenericAPIView):
+class CompleteTaskStatisticsAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CompleteTaskSerializer
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name="date", description="YYYY-MM-DD formatida kunlik statistika", required=False, type=str),
+            OpenApiParameter(name="month", description="YYYY-MM formatida oylik statistika", required=False, type=str),
+            OpenApiParameter(name="year", description="YYYY formatida yillik statistika", required=False, type=str),
+        ],
+        summary="CompleteTask statistikasi",
+        description="Kunlik, oylik yoki yillik statistikani qaytaradi."
+    )
     def get(self, request):
         user = request.user
         date = request.query_params.get("date")
@@ -32,7 +40,7 @@ class CompleteTaskStatisticsAPIView(generics.GenericAPIView):
 
         if date:
             queryset = queryset.filter(completed_at__date=parse_date(date))
-            serializer = self.get_serializer(queryset, many=True)
+            serializer = CompleteTaskSerializer(queryset, many=True)
             return Response({
                 "type": "daily",
                 "date": date,
@@ -46,7 +54,7 @@ class CompleteTaskStatisticsAPIView(generics.GenericAPIView):
                 completed_at__year=int(year),
                 completed_at__month=int(month_num)
             )
-            serializer = self.get_serializer(queryset, many=True)
+            serializer = CompleteTaskSerializer(queryset, many=True)
             return Response({
                 "type": "monthly",
                 "month": month,
@@ -56,7 +64,7 @@ class CompleteTaskStatisticsAPIView(generics.GenericAPIView):
 
         elif year:
             queryset = queryset.filter(completed_at__year=int(year))
-            serializer = self.get_serializer(queryset, many=True)
+            serializer = CompleteTaskSerializer(queryset, many=True)
             return Response({
                 "type": "yearly",
                 "year": year,
