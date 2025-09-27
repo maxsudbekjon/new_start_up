@@ -1,5 +1,4 @@
 from .base import *
-from vocab.models.language import Language
 
 
 class Program(BasicClass):
@@ -12,7 +11,7 @@ class Program(BasicClass):
 
 class Do(BasicClass):
     title = models.CharField(max_length=255)
-    language = models.ForeignKey(Language, on_delete=models.CASCADE, null=True, blank=True)
+    language = models.ForeignKey("vocab.Language", on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
