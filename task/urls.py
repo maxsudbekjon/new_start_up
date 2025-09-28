@@ -3,6 +3,7 @@ from task.views.complate_view import GetAllCompleteTaskAPIView, CompleteTaskStat
 from task.views.do_view import AddDoAPIView, ListDoAPIView
 from task.views.program_view import AddProgramAPIView, ListProgramAPIView, GetTaskProgram
 from task.views.task_view import AddTaskAPIView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
+from vocab.views.book_view import BookPageAPIView
 
 
 urlpatterns = [
@@ -22,5 +23,8 @@ urlpatterns = [
     path('get_task_list/', ListTaskAPIView.as_view()),
     path('update_task/<int:pk>/', UpdateTaskAPIView.as_view()),
     path('delete_task/<int:pk>/', DeleteTaskAPIView.as_view()),
+
+    path('get_book/<int:pk>/', BookPageAPIView.as_view(), ),
+
 
 ]

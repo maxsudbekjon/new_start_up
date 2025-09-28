@@ -19,7 +19,9 @@ class AddTaskAPIView(APIView):
         description="Foydalanuvchi uchun yangi task yaratadi. Yosh va streak bo‘yicha `count` cheklovlari mavjud."
     )
     def post(self, request):
-        serializer = TaskSerializer(data=request.data, context={"request": request})
+
+        serializer = TaskSerializer(data=request.data)
+
         if serializer.is_valid(raise_exception=True):
             user_age = request.user.age
             count = serializer.validated_data.get('count')
@@ -44,8 +46,20 @@ class AddTaskAPIView(APIView):
             elif user_age >= 20 and count > c:
                 return Response({"message": f"20 yoshdan kattalar uchun maksimal {c}"})
 
-            task = serializer.save(user=request.user)
-            return Response(TaskSerializer(task).data, status=201)
+            tasks = list(Task.objects.filter(is_active=True))
+            if len(tasks) >= 1:
+                print("siz yangi task kiritishiz uchun eskini faolsizlantirishingiz kerak.")
+
+                disable_task = input("faolsizlantirish uchun 1 deb kiriting: ")
+
+                if disable_task == "1":
+                    for task in tasks:
+                        task.is_active = False
+                        task.save()
+                        print("faolsizlantirildi")
+
+                    task = serializer.save(user=request.user)
+                    return Response(TaskSerializer(task).data, status=201)
         return Response(serializer.errors, status=400)
 
 
