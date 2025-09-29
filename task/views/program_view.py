@@ -108,7 +108,6 @@ class GetTaskProgram(APIView):
 
         elif task.book is not None:
 
-            # Progressni olish yoki yaratish
             progress, created = BookProgress.objects.get_or_create(user=request.user, book=task.book)
 
             pages_text = []
