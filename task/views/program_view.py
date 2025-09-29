@@ -8,10 +8,11 @@ from task.serializers.program import ProgramSerializer
 from task.models.task import Program, Task
 from vocab.models.language import Language
 from vocab.models.vocab import Vocab
-from vocab.models.book import Book
+from vocab.models.book import Book, BookProgress
 from vocab.serializers.vocab_serializer import VocabSerializer
 from vocab.serializers.book_serializer import BookSerializer
 import random
+import PyPDF2
 
 
 class AddProgramAPIView(APIView):
@@ -84,35 +85,61 @@ class GetTaskProgram(APIView):
     # )
     def get(self, request):
         path_program = request.query_params.get("program")
-        # task_duration = request.query_params.get("duration")
 
         filters = {
             "user": request.user,
             "is_active": True
-            # "is_complete": False,
+
         }
 
         if path_program:
             filters["program__title"] = path_program
-        # if task_duration:
-        #     filters["duration"] = task_duration
 
-        # tasks = Task.objects.filter(**filters)
         try:
             task = Task.objects.get(**filters)
         except Task.DoesNotExist:
             return Response({"error": "task topilmadi"}, status=404)
 
-        if task.title.language is not None:
-            vocabs = Vocab.objects.filter(language__name=task.title.language.name)
+        if task.language is not None:
+            vocabs = Vocab.objects.filter(language__name=task.language.name)
             vocabs = random.sample(list(vocabs), min(len(vocabs), task.count))
             serializer = VocabSerializer(vocabs, many=True).data
             return Response(serializer, status=200)
 
-        elif task.title.book is not None:
-            book = Book.objects.get(name=task.title.book.name)
-            serializer = BookSerializer(book)
-            return Response(serializer.data, status=200)
+        elif task.book is not None:
+
+            # Progressni olish yoki yaratish
+            progress, created = BookProgress.objects.get_or_create(user=request.user, book=task.book)
+
+            pages_text = []
+
+            with open(task.book.book.path, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                total_pages = len(reader.pages)
+
+                start_page = progress.last_page + 1
+                end_page = progress.last_page + task.count
+
+                if end_page > total_pages:
+                    return Response({"error": f"kitobning sahifalari {total_pages} ta sizniki esa {task.count}"},
+                                    status=400)
+
+                for k in range(start_page - 1, end_page):
+                    text = reader.pages[k].extract_text()
+                    pages_text.append({"page": k + 1, "content": text})
+
+                print(end_page)
+
+                progress.last_page = end_page
+                progress.save()
+
+            return Response({
+                "book": task.book.name,
+                "total_pages": total_pages,
+                "start_page": start_page,
+                "end_page": progress.last_page,
+                "pages": pages_text
+            })
 
         else:
             return Response({"error": "bunday til yoki kitob yoq"})

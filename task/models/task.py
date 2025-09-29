@@ -10,9 +10,8 @@ class Program(BasicClass):
 
 
 class Do(BasicClass):
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(max_length=255)
-    language = models.ForeignKey("vocab.Language", on_delete=models.CASCADE, null=True, blank=True)
-    book = models.ForeignKey("vocab.Book", on_delete=models.CASCADE, blank=True, null=True)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -25,6 +24,8 @@ class Task(BasicClass):
     program = models.ForeignKey('task.Program', on_delete=models.CASCADE, verbose_name='program', related_name='tasks')
     count = models.IntegerField(default=0)
     duration = models.IntegerField(default=0)
+    language = models.ForeignKey("vocab.Language", on_delete=models.CASCADE, null=True, blank=True)
+    book = models.ForeignKey("vocab.Book", on_delete=models.CASCADE, blank=True, null=True)
     is_active = models.BooleanField(default=True)
     is_complete = models.BooleanField(default=False)
 

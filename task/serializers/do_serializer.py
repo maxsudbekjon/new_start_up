@@ -6,4 +6,6 @@ class DoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Do
-        fields = ('id', 'title', 'description', "language")
+        fields = ('id', 'user', 'title', 'description')
+
+        read_only_fields = ['user']

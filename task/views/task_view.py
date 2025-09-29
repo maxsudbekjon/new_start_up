@@ -60,6 +60,8 @@ class AddTaskAPIView(APIView):
 
                     task = serializer.save(user=request.user)
                     return Response(TaskSerializer(task).data, status=201)
+                else:
+                    return Response({"error": "siz 1 deb kiritishingiz kerak edi.!"}, status=400)
         return Response(serializer.errors, status=400)
 
 
