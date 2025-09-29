@@ -58,31 +58,25 @@ class ListProgramAPIView(APIView):
 
 
 class GetTaskProgram(APIView):
-    # permission_classes = [IsAuthenticated]
-    # @extend_schema(
-    #     summary="Task bo‘yicha random vocablarni olish",
-    #     description="Program va language bo‘yicha filterlab, tasodifiy vocablarni qaytaradi.",
-    #     parameters=[
-    #         OpenApiParameter(
-    #             name="program",
-    #             description="Program nomi",
-    #             required=False,
-    #             type=str,
-    #             location=OpenApiParameter.QUERY
-    #         ),
-    #         OpenApiParameter(
-    #             name="language",
-    #             description="Til nomi (english, russian, arabic, turkish)",
-    #             required=False,
-    #             type=str,
-    #             location=OpenApiParameter.QUERY
-    #         ),
-    #     ],
-    #     responses={
-    #         200: OpenApiResponse(response=VocabSerializer(many=True), description="Tasodifiy vocablar"),
-    #         400: OpenApiResponse(description="Xato so‘rov"),
-    #     },
-    # )
+    permission_classes = [IsAuthenticated]
+    @extend_schema(
+        summary="Task bo‘yicha random vocablarni olish",
+        description="Program va language bo‘yicha filterlab, tasodifiy vocablarni qaytaradi.",
+        parameters=[
+            OpenApiParameter(
+                name="program",
+                description="Program nomi",
+                required=False,
+                type=str,
+                location=OpenApiParameter.QUERY
+            ),
+
+        ],
+        responses={
+            200: OpenApiResponse(response=VocabSerializer(many=True), description="Tasodifiy vocablar"),
+            400: OpenApiResponse(description="Xato so‘rov"),
+        },
+    )
     def get(self, request):
         path_program = request.query_params.get("program")
 
@@ -126,8 +120,6 @@ class GetTaskProgram(APIView):
                 for k in range(start_page - 1, end_page):
                     text = reader.pages[k].extract_text()
                     pages_text.append({"page": k + 1, "content": text})
-
-                print(end_page)
 
                 progress.last_page = end_page
                 progress.save()
