@@ -1,5 +1,6 @@
 from django.urls import path
-from task.views.complate_view import GetAllCompleteTaskAPIView, CompleteTaskStatisticsAPIView
+from task.views.complate_view import WeeklyStatisticAPIView, \
+    MonthlyStatisticAPIView, YearlyStatisticAPIView
 from task.views.do_view import AddDoAPIView, ListDoAPIView
 from task.views.program_view import AddProgramAPIView, ListProgramAPIView, GetTaskProgram
 from task.views.task_view import AddTaskAPIView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
@@ -7,9 +8,10 @@ from vocab.views.book_view import BookPageAPIView
 
 
 urlpatterns = [
-    # path('add_complete_task/', view=AddCompleteTaskAPIView.as_view()),
-    path('list_complete_task/', GetAllCompleteTaskAPIView.as_view()),
-    path('get_statistic/', CompleteTaskStatisticsAPIView.as_view()),
+    path('get_weekly_statistics/', WeeklyStatisticAPIView.as_view()),
+    path('get_monthly_statistics/', MonthlyStatisticAPIView.as_view()),
+    path('get_yearly_statistics/', YearlyStatisticAPIView.as_view()),
+
 
     path('add_do/', AddDoAPIView.as_view()),
     path('get_do_list/', ListDoAPIView.as_view()),

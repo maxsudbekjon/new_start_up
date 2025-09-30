@@ -1,77 +1,113 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema
 from task.models import CompleteTask
-from task.serializers.complete_task_serializer import CompleteTaskSerializer
-from django.utils.dateparse import parse_date
+import datetime
 
 
-class GetAllCompleteTaskAPIView(APIView):
+class WeeklyStatisticAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        responses=CompleteTaskSerializer(many=True),
-        summary="Barcha yakunlangan tasklar"
+        summary="Haftalik statistika",
+        description="Foydalanuvchining joriy hafta davomida tugatgan vazifalari sonini qaytaradi.",
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "week": {"type": "integer", "example": 39},
+                    "count": {"type": "integer", "example": 12}
+                }
+            }
+        }
     )
     def get(self, request):
-        complete_tasks = CompleteTask.objects.filter(task__user=request.user)
-        serializer = CompleteTaskSerializer(complete_tasks, many=True)
-        return Response(serializer.data, status=200)
+        today = datetime.datetime.today()
+        current_week = today.isocalendar()[1]
+
+        queryset = CompleteTask.objects.filter(
+            user=request.user,
+            completed_at__week=current_week,
+            completed_at__year=today.year
+        )
+
+        count = queryset.count()
+
+        return Response(
+            {
+                "week": current_week,
+                "count": count
+            }
+        )
 
 
-class CompleteTaskStatisticsAPIView(APIView):
+class MonthlyStatisticAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        parameters=[
-            OpenApiParameter(name="date", description="YYYY-MM-DD formatida kunlik statistika", required=False, type=str),
-            OpenApiParameter(name="month", description="YYYY-MM formatida oylik statistika", required=False, type=str),
-            OpenApiParameter(name="year", description="YYYY formatida yillik statistika", required=False, type=str),
-        ],
-        summary="CompleteTask statistikasi",
-        description="Kunlik, oylik yoki yillik statistikani qaytaradi."
+        summary="Oylik statistika",
+        description="Foydalanuvchining joriy oy davomida tugatgan vazifalari sonini qaytaradi.",
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "month": {"type": "integer", "example": 9},
+                    "count": {"type": "integer", "example": 45}
+                }
+            }
+        }
     )
     def get(self, request):
-        user = request.user
-        date = request.query_params.get("date")
-        month = request.query_params.get("month")
-        year = request.query_params.get("year")
+        today = datetime.datetime.today()
+        current_month = today.month
 
-        queryset = CompleteTask.objects.filter(user=user)
+        queryset = CompleteTask.objects.filter(
+            user=request.user,
+            completed_at__month=current_month,
+            completed_at__year=today.year
+        )
 
-        if date:
-            queryset = queryset.filter(completed_at__date=parse_date(date))
-            serializer = CompleteTaskSerializer(queryset, many=True)
-            return Response({
-                "type": "daily",
-                "date": date,
-                "tasks": serializer.data,
-                "count": queryset.count()
-            })
+        count = queryset.count()
 
-        elif month:
-            year, month_num = month.split("-")
-            queryset = queryset.filter(
-                completed_at__year=int(year),
-                completed_at__month=int(month_num)
-            )
-            serializer = CompleteTaskSerializer(queryset, many=True)
-            return Response({
-                "type": "monthly",
-                "month": month,
-                "tasks": serializer.data,
-                "count": queryset.count()
-            })
+        return Response(
+            {
+                "month": current_month,
+                "count": count
+            }
+        )
 
-        elif year:
-            queryset = queryset.filter(completed_at__year=int(year))
-            serializer = CompleteTaskSerializer(queryset, many=True)
-            return Response({
-                "type": "yearly",
-                "year": year,
-                "tasks": serializer.data,
-                "count": queryset.count()
-            })
 
-        return Response({"error": "date, month yoki year query param bering"}, status=400)
+class YearlyStatisticAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Yillik statistika",
+        description="Foydalanuvchining joriy yil davomida tugatgan vazifalari sonini qaytaradi.",
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "year": {"type": "integer", "example": 2025},
+                    "count": {"type": "integer", "example": 320}
+                }
+            }
+        }
+    )
+    def get(self, request):
+        today = datetime.datetime.today()
+        current_year = today.year
+
+        queryset = CompleteTask.objects.filter(
+            user=request.user,
+            completed_at__year=current_year
+        )
+
+        count = queryset.count()
+
+        return Response(
+            {
+                "year": current_year,
+                "count": count
+            }
+        )

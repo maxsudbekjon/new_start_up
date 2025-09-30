@@ -1,3 +1,4 @@
+from django.core.exceptions import MultipleObjectsReturned
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from vocab.models.vocab import Vocab
 from vocab.models.book import Book, BookProgress
 from vocab.serializers.vocab_serializer import VocabSerializer
 from vocab.serializers.book_serializer import BookSerializer
+from task.serializers.task_serializer import TaskSerializer
 import random
 import PyPDF2
 
@@ -93,6 +95,9 @@ class GetTaskProgram(APIView):
             task = Task.objects.get(**filters)
         except Task.DoesNotExist:
             return Response({"error": "task topilmadi"}, status=404)
+        except MultipleObjectsReturned:
+            task = Task.objects.filter(**filters)
+            task = task.first()
 
         if task.language is not None:
             vocabs = Vocab.objects.filter(language__name=task.language.name)
@@ -133,4 +138,5 @@ class GetTaskProgram(APIView):
             })
 
         else:
-            return Response({"error": "bunday til yoki kitob yoq"})
+            serializer = TaskSerializer(task)
+            return Response(serializer.data, status=200)
