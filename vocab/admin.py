@@ -36,3 +36,14 @@ class BookAdmin(admin.ModelAdmin):
         'description',
 
     )
+
+
+@admin.register(BookProgress)
+class BookAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'book',
+        'last_page'
+
+    )

@@ -6,6 +6,9 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = "__all__"
-
         read_only_fields = ['user']
+        extra_kwargs = {
+            'is_active': {'default': True},
+            'is_complete': {'default': False},
+        }
 

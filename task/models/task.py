@@ -1,5 +1,4 @@
 from .base import *
-from vocab.models.language import Language
 
 
 class Program(BasicClass):
@@ -11,8 +10,8 @@ class Program(BasicClass):
 
 
 class Do(BasicClass):
+    user = models.ForeignKey('accounts.User', on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(max_length=255)
-    language = models.ForeignKey(Language, on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -24,8 +23,10 @@ class Task(BasicClass):
     title = models.ForeignKey('task.Do', on_delete=models.CASCADE, verbose_name='do', related_name='tasks')
     program = models.ForeignKey('task.Program', on_delete=models.CASCADE, verbose_name='program', related_name='tasks')
     count = models.IntegerField(default=0)
-    duration = models.CharField(max_length=150)
-    is_active = models.BooleanField(default=False)
+    duration = models.IntegerField(default=0)
+    language = models.ForeignKey("vocab.Language", on_delete=models.CASCADE, null=True, blank=True)
+    book = models.ForeignKey("vocab.Book", on_delete=models.CASCADE, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
     is_complete = models.BooleanField(default=False)
 
     def __str__(self):

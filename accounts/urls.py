@@ -1,8 +1,6 @@
 from django.urls import path
 
-from .views import *
-
-from .views import RegisterApiView, CustomTokenObtainPairView
+from .views import RegisterApiView, CustomTokenObtainPairView, UpdateUserProfileAPIView, GetUserProfile
 
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -13,5 +11,6 @@ urlpatterns = [
 
     # profile
     path('update_user_profile/', UpdateUserProfileAPIView.as_view(), ),
+    path('get_my_pofile/', GetUserProfile.as_view(), ),
 
 ]
