@@ -97,9 +97,7 @@ class UserTaskHistoryView(APIView):
             user=request.user,
             completed_at__date=today   # faqat bugungi
         ).values(
-            "task__title__title", 
             "spent_time", 
-            "completed_at"
         )
 
         return Response(list(completed), status=200)

@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from task.serializers.task_serializer import TaskSerializer
+from task.serializers.task_serializer import ComplatetasTimeSerializer, ListTaskSerializer, TaskSerializer
 from rest_framework.permissions import IsAuthenticated
 from task.models.task import Task
 from task.models.complete_task import CompleteTask
@@ -44,7 +44,7 @@ class AddTaskAPIView(generics.GenericAPIView):
 @extend_schema(tags=["Task"])
 class ListTaskAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = TaskSerializer
+    serializer_class = ListTaskSerializer
     queryset = Task.objects.all()
 
     def get_queryset(self):
@@ -72,23 +72,30 @@ class DeleteTaskAPIView(APIView):
         except Task.DoesNotExist:
             return Response({"error": "task not found"}, status=404)
 
-
+@extend_schema(tags=["Task"], request=ComplatetasTimeSerializer)
 class CompleteTaskView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, task_id):
+        serializer = ComplatetasTimeSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
         task = Task.objects.filter(id=task_id, user=request.user).first()
         if not task:
             return Response({"error": "Task topilmadi"}, status=404)
 
         # Boshlanish va tugash vaqtlarini olish
-        start_time = request.data.get("start_time")  # frontend yuboradi (timestamp)
-        end_time = request.data.get("end_time")      # frontend yuboradi (timestamp)
+        start_time = serializer.validated_data.get("start_time")  # int (timestamp)
+        end_time = serializer.validated_data.get("end_time")      # int (timestamp)
 
         if not start_time or not end_time:
             return Response({"error": "start_time va end_time yuboring"}, status=400)
 
-        spent_time = int(end_time) - int(start_time)  # sekundda hisoblaymiz
+        start_minutes = start_time.hour * 60 + start_time.minute
+        end_minutes = end_time.hour * 60 + end_time.minute
+
+        spent_time = end_minutes - start_minutes  # sekundlarda hisoblash
 
         complete_task = CompleteTask.objects.create(
             user=request.user,
@@ -101,3 +108,4 @@ class CompleteTaskView(APIView):
             "task": task.title.title,
             "spent_time": spent_time
         }, status=201)
+
