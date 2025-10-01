@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -73,3 +74,32 @@ class CompleteTaskStatisticsAPIView(APIView):
             })
 
         return Response({"error": "date, month yoki year query param bering"}, status=400)
+
+@extend_schema(tags=["Complate Tasks"])
+class TodayCompletedTasksCountView(APIView):
+    permission_classes = [IsAuthenticated]  # faqat login bo‘lgan user ko‘ra oladi
+
+    def get(self, request):
+        today = timezone.now().date()
+        count = CompleteTask.objects.filter(
+            user=request.user,
+            completed_at__date=today
+        ).count()
+        return Response({"today_completed_tasks_count": count})
+@extend_schema(tags=["Complate Tasks"])
+class UserTaskHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        today = timezone.now().date()  # bugungi sana
+
+        completed = CompleteTask.objects.filter(
+            user=request.user,
+            completed_at__date=today   # faqat bugungi
+        ).values(
+            "task__title__title", 
+            "spent_time", 
+            "completed_at"
+        )
+
+        return Response(list(completed), status=200)

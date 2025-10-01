@@ -73,3 +73,31 @@ class DeleteTaskAPIView(APIView):
             return Response({"error": "task not found"}, status=404)
 
 
+class CompleteTaskView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, task_id):
+        task = Task.objects.filter(id=task_id, user=request.user).first()
+        if not task:
+            return Response({"error": "Task topilmadi"}, status=404)
+
+        # Boshlanish va tugash vaqtlarini olish
+        start_time = request.data.get("start_time")  # frontend yuboradi (timestamp)
+        end_time = request.data.get("end_time")      # frontend yuboradi (timestamp)
+
+        if not start_time or not end_time:
+            return Response({"error": "start_time va end_time yuboring"}, status=400)
+
+        spent_time = int(end_time) - int(start_time)  # sekundda hisoblaymiz
+
+        complete_task = CompleteTask.objects.create(
+            user=request.user,
+            task=task,
+            spent_time=spent_time
+        )
+
+        return Response({
+            "message": "Task tugallandi",
+            "task": task.title.title,
+            "spent_time": spent_time
+        }, status=201)

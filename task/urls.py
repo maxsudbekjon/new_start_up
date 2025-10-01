@@ -1,8 +1,8 @@
 from django.urls import path
-from task.views.complate_view import GetAllCompleteTaskAPIView, CompleteTaskStatisticsAPIView
+from task.views.complate_view import GetAllCompleteTaskAPIView, CompleteTaskStatisticsAPIView, TodayCompletedTasksCountView, UserTaskHistoryView
 from task.views.do_view import AddDoAPIView, ListDoAPIView
 from task.views.program_view import  ListProgramAPIView
-from task.views.task_view import AddTaskAPIView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
+from task.views.task_view import AddTaskAPIView, CompleteTaskView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
 
 
 urlpatterns = [
@@ -19,5 +19,8 @@ urlpatterns = [
     path('get_task_list/', ListTaskAPIView.as_view()),
     path('update_task/<int:pk>/', UpdateTaskAPIView.as_view()),
     path('delete_task/<int:pk>/', DeleteTaskAPIView.as_view()),
-
+    path("tasks/completed/today-count/", TodayCompletedTasksCountView.as_view()),
+    path("tasks/completed/time/today-count/", UserTaskHistoryView.as_view()),
+    path("tasks/<int:task_id>/complete/", CompleteTaskView.as_view(), name="complete-task"),
 ]
+
