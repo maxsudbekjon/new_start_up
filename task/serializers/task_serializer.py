@@ -3,12 +3,19 @@ from task.models import Task
 from vocab.models.vocab import Vocab
 
 
+
+
+
+
+
+
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ["title","program","count"]
 
         read_only_fields = ['user']
+
 
 class ListTaskSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source="title.title", read_only=True)

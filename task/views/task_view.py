@@ -7,7 +7,13 @@ from task.models.complete_task import CompleteTask
 from task.utils import calculate_streak
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
-@extend_schema(tags=["Task"], request=TaskSerializer)
+
+
+
+
+
+
+@extend_schema(tags=["Task yaratish"], request=TaskSerializer)
 class AddTaskAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
@@ -41,7 +47,8 @@ class AddTaskAPIView(generics.GenericAPIView):
             return Response(self.get_serializer(task).data, status=201)
         return Response(serializer.errors, status=400)
 
-@extend_schema(tags=["Task"])
+
+@extend_schema(tags=["Tasklar ro'yxati"])
 class ListTaskAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ListTaskSerializer
@@ -50,7 +57,8 @@ class ListTaskAPIView(generics.ListAPIView):
     def get_queryset(self):
         return self.queryset.filter(user=self.request.user)
 
-@extend_schema(tags=["Task"], request=TaskSerializer)
+
+@extend_schema(tags=["Tasklar ro'yxati"], request=TaskSerializer)
 class UpdateTaskAPIView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
@@ -60,7 +68,7 @@ class UpdateTaskAPIView(generics.UpdateAPIView):
         return self.queryset.filter(user=self.request.user)
 
 
-@extend_schema(tags=["Task"])
+@extend_schema(tags=["Tasklar ro'yxati"])
 class DeleteTaskAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -72,7 +80,8 @@ class DeleteTaskAPIView(APIView):
         except Task.DoesNotExist:
             return Response({"error": "task not found"}, status=404)
 
-@extend_schema(tags=["Task"], request=ComplatetasTimeSerializer)
+
+@extend_schema(tags=["Task bajarish uchun ketgan vaqt"], request=ComplatetasTimeSerializer)
 class CompleteTaskView(APIView):
     permission_classes = [IsAuthenticated]
 

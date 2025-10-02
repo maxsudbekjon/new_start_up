@@ -5,7 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from task.models.task import Do
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
-@extend_schema(tags=["Mashg'ulot"], request=DoSerializer)
+
+
+
+
+@extend_schema(tags=["Task yaratish"], request=DoSerializer)
 class AddDoAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DoSerializer
@@ -17,7 +21,8 @@ class AddDoAPIView(generics.GenericAPIView):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-@extend_schema(tags=["Mashg'ulot"])
+
+@extend_schema(tags=["Task yaratish"])
 class ListDoAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DoSerializer

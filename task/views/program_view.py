@@ -13,7 +13,13 @@ from task.serializers.task_serializer import  VocabSerializer
 from vocab.models.book import Book
 from vocab.models.vocab import Vocab
 
-@extend_schema(tags=["program"])
+
+
+
+
+
+
+@extend_schema(tags=["Task yaratish"])
 class ListProgramAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProgramSerializer
@@ -24,8 +30,6 @@ class ListProgramAPIView(generics.ListAPIView):
         if not queryset.exists():
             return Response({"message": "not any program found"}, status=200)
         return super().list(request, *args, **kwargs)
-
-
 
 
 class GetTaskProgram(APIView):

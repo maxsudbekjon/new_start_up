@@ -7,6 +7,11 @@ from accounts.models.profile import Profile
 User = get_user_model()
 
 
+
+
+
+
+
 class CustomUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])
     age = serializers.CharField(required=True)

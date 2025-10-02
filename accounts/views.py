@@ -7,12 +7,17 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
 from accounts.models.profile import Profile
 from drf_spectacular.utils import extend_schema
-
 from accounts.serializers import CustomUserSerializer, ProfileSerializer
-# from drf_spectacular.utils import
 User = get_user_model()
 
-@extend_schema(tags=["Auth"],request=CustomUserSerializer)
+
+
+
+
+
+
+
+@extend_schema(request=CustomUserSerializer)
 class RegisterApiView(APIView):
     permission_classes = [AllowAny]
 
@@ -24,6 +29,7 @@ class RegisterApiView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
@@ -31,11 +37,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         token['phone'] = user.phone
         return token
+    
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
-@extend_schema(tags=["Auth"],request=ProfileSerializer)
+
+@extend_schema(request=ProfileSerializer)
 class UpdateUserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
