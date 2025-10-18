@@ -11,7 +11,6 @@ class Profile(models.Model):
     image = models.ImageField(default='default.jpg', upload_to='profile_pics')
     birth_date = models.DateField(null=True, blank=True)
     bio = RichTextField()
-    age = models.IntegerField(default=0)
     status = models.CharField(max_length=30, blank=True)
     score = models.IntegerField(default=0)
     location_region = models.ForeignKey("Region", on_delete=models.CASCADE, null=True, blank=True)

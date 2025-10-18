@@ -21,7 +21,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'age', 'phone', 'password', 'password2']
+        fields = ['id', 'username', 'age', 'phone', 'password', 'password2','email']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:
@@ -41,3 +41,42 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['user', 'score']
 
 
+class UserDetailModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=User
+        fields=['username',"phone","age","email"]
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    rank = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['rank', 'username', 'score']
+
+    def get_rank(self, obj):
+        # Serializer context orqali obyektlar ro‘yxatini olish
+        ranked_profiles = self.context.get('ranked_profiles', [])
+        for index, profile in enumerate(ranked_profiles, start=1):
+            if profile.id == obj.id:
+                return index
+        return None
+
+
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    rank = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['rank', 'username', 'score']
+
+    def get_rank(self, obj):
+        ranked_profiles = self.context.get('ranked_profiles', [])
+        for index, profile in enumerate(ranked_profiles, start=1):
+            if profile.id == obj.id:
+                return index
+        return None
