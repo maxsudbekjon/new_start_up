@@ -20,6 +20,7 @@ class TaskSerializer(serializers.ModelSerializer):
 class ListTaskSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source="title.title", read_only=True)
     program = serializers.CharField(source="program.title", read_only=True)
+    program_image = serializers.ImageField(source="program.image", read_only=True)
 
     class Meta:
         model = Task
@@ -27,8 +28,10 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "program",
+            "program_image",
             "count",
-            "is_active",
+            "is_active"
+    
         ]
 
 

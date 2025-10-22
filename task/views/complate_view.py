@@ -7,7 +7,7 @@ from drf_spectacular.utils import extend_schema
 from datetime import  timedelta
 from django.utils.timezone import now
 import calendar
-
+from rest_framework import status
 
 
 
@@ -88,7 +88,10 @@ class MonthlyCompleteTaskAPIView(APIView):
         )
 
         if not queryset.exists():
-            return None
+            return Response(
+                {"message": "O‘tgan oyda bajarilgan topshiriqlar yo‘q."},
+                status=status.HTTP_200_OK
+            )
 
         monthly_stats = []
         for week_num in range(1, 5):
@@ -120,7 +123,10 @@ class YearlyCompleteTaskAPIView(APIView):
         )
 
         if not queryset.exists():
-            return None
+            return Response(
+                {"message": "O‘tgan yil bajarilgan topshiriqlar yo‘q."},
+                status=status.HTTP_200_OK
+            )
 
         yearly_stats = []
         for month_num in range(1, 13):
