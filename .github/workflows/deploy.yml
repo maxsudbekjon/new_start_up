@@ -1,0 +1,36 @@
+name: Deploy to Contabo
+
+on:
+  push:
+    branches:
+      - main  # yoki siz ishlatadigan branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Copy files to server
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ 194.146.13.93 }}
+        username: ${{ root }}
+        key: ${{ AAAAC3NzaC1lZDI1NTE5AAAAIFAAr8QJSv/blbslhAojujw5W67auspVIuteCZOa+NkE }}
+        port: 22
+        source: "./"
+        target: "/root/www/myproject/new_start_up/"
+
+    - name: Restart Docker containers
+      uses: appleboy/ssh-action@v0.1.9
+      with:
+        host: ${{ 194.146.13.93 }}
+        username: ${{ root }}
+        key: ${{ AAAAC3NzaC1lZDI1NTE5AAAAIFAAr8QJSv/blbslhAojujw5W67auspVIuteCZOa+NkE }}
+        port: 22
+        script: |
+          cd /root/www/myproject/new_start_up/
+          docker-compose down
+          docker-compose up -d --build
