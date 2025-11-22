@@ -57,7 +57,10 @@ class WeeklyCompleteTaskAPIView(APIView):
         queryset = CompleteTask.objects.filter(user=user, completed_at__date__range=[start_of_week, end_of_week])
         
         if not queryset.exists():
-            return None
+            return Response(
+                {"message": "O‘tgan hafta bajarilgan topshiriqlar yo‘q."},
+                status=status.HTTP_200_OK
+            )
 
         daily_stats = []
         for i in range(7):

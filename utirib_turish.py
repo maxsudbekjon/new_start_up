@@ -7,12 +7,16 @@ import os
 import django
 from datetime import date
 import threading
-from task.models import CompletedTask, Do
-from django.contrib.auth import get_user_model
 
-# Django sozlash
+# ⚠️ Django sozlash
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
+
+# ⚠️ Django setup'dan keyin import qilinadi!
+from task.models.complete_task import CompleteTask
+from task.models import Do
+from django.contrib.auth import get_user_model
+
 
 class SquatCounterThread(threading.Thread):
     def __init__(self, user_phone, task_title="Squat", count_limit=5):
@@ -35,7 +39,7 @@ class SquatCounterThread(threading.Thread):
     def save_to_db(self, user):
         do_object, _ = Do.objects.get_or_create(title=self.task_title)
         today = date.today()
-        completed_task, created = CompletedTask.objects.get_or_create(
+        completed_task, created = CompleteTask.objects.get_or_create(
             user=user, do=do_object, date=today,
             defaults={'count': 1}
         )

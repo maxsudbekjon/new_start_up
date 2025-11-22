@@ -14,8 +14,7 @@ class Profile(models.Model):
     status = models.CharField(max_length=30, blank=True)
     score = models.IntegerField(default=0)
     location_region = models.ForeignKey("Region", on_delete=models.CASCADE, null=True, blank=True)
-    location_district = ChainedForeignKey("District", chained_field="location_region", chained_model_field="region",
-                                          on_delete=models.CASCADE, null=True, blank=True)
+    location_district = models.ForeignKey("District", on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'

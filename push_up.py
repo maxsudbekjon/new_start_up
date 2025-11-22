@@ -8,13 +8,14 @@ import os
 import django
 from datetime import date
 import sys
-
+from task.models import  Do
+from django.contrib.auth import get_user_model
+from task.models.complete_task import CompleteTask
 # 🧩 Django setup
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from task.models import CompletedTask, Do
-from django.contrib.auth import get_user_model
+
 
 # 📱 Foydalanuvchini olish
 def get_current_user():
@@ -31,7 +32,7 @@ def get_current_user():
 def save_to_db(user, do_title, count):
     do_obj, _ = Do.objects.get_or_create(title=do_title)
     today = date.today()
-    task, created = CompletedTask.objects.get_or_create(
+    task, created = CompleteTask.objects.get_or_create(
         user=user,
         do=do_obj,
         date=today,
