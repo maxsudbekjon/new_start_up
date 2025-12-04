@@ -45,7 +45,7 @@ class User(AbstractUser, BasicClass):
         ('high', 'Yuqori')
     )
 
-    username = models.CharField(max_length=255, unique=True)
+    username = models.CharField(max_length=255, unique=True,null=True,blank=True)
     phone = models.CharField(
         max_length=255,
         validators=[phone_validator],
