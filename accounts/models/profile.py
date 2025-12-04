@@ -28,7 +28,6 @@ def create_user_profile(sender, instance, created, **kwargs):
         Profile.objects.get_or_create(
             user=user,
             bio="this is my bio",
-            age=user.age
 
         )
 

@@ -29,8 +29,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('password2')
-        user = User.objects.create_user(**validated_data)
+        validated_data.pop("password2")
+
+        password = validated_data.pop("password")
+
+        user = User.objects.create_user(password=password, **validated_data)
         return user
 
 

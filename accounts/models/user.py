@@ -10,32 +10,32 @@ import re
 class CustomUserManager(BaseUserManager):
 
     def create_user(self, phone, password=None, **extra_fields):
-
         if not phone:
             raise ValidationError('Phone is required')
 
-        # extra_fields['phone'] = phone
+        # phone validator
+        if not re.match(phone_pattern, phone):
+            raise ValidationError({"phone": "Telefon raqami noto‘g‘ri formatda!"})
 
-        if re.match(phone_pattern, phone):
-            extra_fields['phone'] = phone
-        else:
-            raise ValidationError({"phone": "Telfon raqamni kiritish shart!"})
+        extra_fields['phone'] = phone
 
         user = self.model(**extra_fields)
         user.set_password(password)
         user.save(using=self._db)
-
         return user
 
-    def create_superuser(self, phone, password=None, **extra_fields):
+    def create_superuser(self, phone, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
 
-        if not phone:
-            raise ValidationError('Superuser must have a phone.')
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
 
-        return self.create_user(phone=phone, password=password, **extra_fields)
+        return self.create_user(phone, password, **extra_fields)
+
 
 
 class User(AbstractUser, BasicClass):
