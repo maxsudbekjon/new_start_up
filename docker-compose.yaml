@@ -12,14 +12,32 @@ services:
       - ./.env
     ports:
       - 8000:8000
+
+    # 🟩 WEB (Django/Gunicorn) HEALTHCHECK
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+    # 🟩 HEALTHY bo‘lmaguncha boshqa servicelar kutadi
     depends_on:
-      - redis
-      - mq
+      redis:
+        condition: service_healthy
+      mq:
+        condition: service_healthy
 
   redis:
     image: redis:7
     container_name: qadam_redis
     restart: always
+
+    # 🟩 REDIS HEALTHCHECK
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   mq:
     image: rabbitmq:3-management
@@ -31,6 +49,13 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
 
+    # 🟩 RABBITMQ HEALTHCHECK
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   nginx:
     image: nginx:latest
     container_name: qadam_nginx
@@ -38,6 +63,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
+
+    # 🟩 WEB HEALTHY bo‘lgunga qadar nginx kutadi
+    depends_on:
+      web:
+        condition: service_healthy
+
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./static:/app/static
