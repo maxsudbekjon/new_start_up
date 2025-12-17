@@ -43,21 +43,29 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import LoginSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
+class LoginAPIView(APIView):
+    serializer_class = LoginSerializer
 
-@extend_schema(
-    request=LoginSerializer,
-    responses={200: LoginSerializer},
-)
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def login_view(request):
-    serializer = LoginSerializer(
-        data=request.data,
-        context={"request": request},
-    )
-    serializer.is_valid(raise_exception=True)
-    return Response(serializer.validated_data, status=status.HTTP_200_OK)
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data["user"]
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": {
+                    "id": user.id,
+                    "phone": user.phone,
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
    
 @extend_schema(request=ProfileSerializer)
 class UpdateUserProfileAPIView(APIView):

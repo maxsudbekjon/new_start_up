@@ -29,32 +29,6 @@ class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
-    def validate(self, attrs):
-        phone = attrs.get("phone")
-        password = attrs.get("password")
-
-        user = authenticate(
-            request=self.context.get("request"),
-            phone=phone,
-            password=password,
-        )
-
-        if not user:
-            raise serializers.ValidationError(
-                "Login yoki parol noto‘g‘ri"
-            )
-
-        refresh = RefreshToken.for_user(user)
-
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": {
-                "id": user.id,
-                "phone": user.phone,
-                "username": user.username,
-            },
-        }
 
 
 
