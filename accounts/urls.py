@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import MonthlyRatingListView, GlobalRatingListView, RegisterApiView, CustomTokenObtainPairView, StreakRatingListView, UpdateUserProfileAPIView, UserDetailAPIView
+from .views import MonthlyRatingListView, GlobalRatingListView, RegisterApiView, StreakRatingListView, UpdateUserProfileAPIView, UserDetailAPIView,login_view
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('register/', RegisterApiView.as_view()),
-    path('login/', CustomTokenObtainPairView.as_view()),
+    path('login/', login_view),
     path('token/refresh/', TokenRefreshView.as_view()),
     path('update_user_profile/', UpdateUserProfileAPIView.as_view()),
     path("user/detail",UserDetailAPIView.as_view()),

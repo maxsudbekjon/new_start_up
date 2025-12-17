@@ -9,11 +9,14 @@ services:
     restart: always
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://194.146.13.93:8000/health/"]
+      test:
+        [
+          "CMD-SHELL",
+          "python - <<EOF\nimport urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/')\nEOF"
+        ]
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 5
-
     depends_on:
       redis:
         condition: service_healthy

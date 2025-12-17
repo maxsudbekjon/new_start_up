@@ -21,6 +21,7 @@ RUN useradd -m django
 
 COPY --from=builder /usr/local /usr/local
 COPY . .
+RUN chown -R django:django /app
 
 USER django
 
