@@ -36,36 +36,7 @@ class RegisterApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework import status
 
-from .serializers import LoginSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-
-class LoginAPIView(APIView):
-    permission_classes = [AllowAny]
-    serializer_class = LoginSerializer
-
-    def post(self, request):
-        print("LOGIN DATA:", request.data)
-
-        serializer = self.serializer_class(data=request.data)
-
-        if not serializer.is_valid():
-            print("LOGIN ERRORS:", serializer.errors)
-            return Response(serializer.errors, status=400)
-
-        user = serializer.validated_data["user"]
-
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-        })
-   
 @extend_schema(request=ProfileSerializer)
 class UpdateUserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
