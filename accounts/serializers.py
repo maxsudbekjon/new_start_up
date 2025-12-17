@@ -15,6 +15,16 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
+from django.contrib.auth import authenticate
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+from django.contrib.auth import authenticate
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -45,6 +55,8 @@ class LoginSerializer(serializers.Serializer):
                 "username": user.username,
             },
         }
+
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])

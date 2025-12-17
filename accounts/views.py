@@ -36,43 +36,29 @@ class RegisterApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-from django.contrib.auth import authenticate
-from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework import status
+
+from .serializers import LoginSerializer
 
 
-@extend_schema(request=LoginSerializer)
-class LoginSerializer(serializers.Serializer):
-    phone = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, attrs):
-        phone = attrs.get("phone")
-        password = attrs.get("password")
-
-        user = authenticate(
-            request=self.context.get("request"),
-            phone=phone,
-            password=password,
-        )
-
-        if not user:
-            raise serializers.ValidationError(
-                "Login yoki parol noto‘g‘ri"
-            )
-
-        refresh = RefreshToken.for_user(user)
-
-        return {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": {
-                "id": user.id,
-                "phone": user.phone,
-                "username": user.username,
-            },
-}     
+@extend_schema(
+    request=LoginSerializer,
+    responses={200: LoginSerializer},
+)
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def login_view(request):
+    serializer = LoginSerializer(
+        data=request.data,
+        context={"request": request},
+    )
+    serializer.is_valid(raise_exception=True)
+    return Response(serializer.validated_data, status=status.HTTP_200_OK)
+   
 @extend_schema(request=ProfileSerializer)
 class UpdateUserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
