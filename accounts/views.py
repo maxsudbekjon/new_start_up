@@ -51,22 +51,20 @@ class LoginAPIView(APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        if not serializer.is_valid():
+            # 👇 MUHIM DEBUG
+            print("LOGIN ERRORS:", serializer.errors)
+            return Response(serializer.errors, status=400)
 
         user = serializer.validated_data["user"]
+
         refresh = RefreshToken.for_user(user)
 
-        return Response(
-            {
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-                "user": {
-                    "id": user.id,
-                    "phone": user.phone,
-                },
-            },
-            status=status.HTTP_200_OK,
-        )
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        })
    
 @extend_schema(request=ProfileSerializer)
 class UpdateUserProfileAPIView(APIView):
