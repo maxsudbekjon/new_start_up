@@ -50,17 +50,17 @@ class LoginAPIView(APIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
+        print("LOGIN DATA:", request.data)
+
         serializer = self.serializer_class(data=request.data)
 
         if not serializer.is_valid():
-            # 👇 MUHIM DEBUG
             print("LOGIN ERRORS:", serializer.errors)
             return Response(serializer.errors, status=400)
 
         user = serializer.validated_data["user"]
 
         refresh = RefreshToken.for_user(user)
-
         return Response({
             "refresh": str(refresh),
             "access": str(refresh.access_token),
