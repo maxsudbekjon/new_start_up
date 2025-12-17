@@ -28,6 +28,24 @@ from rest_framework_simplejwt.tokens import RefreshToken
 class LoginSerializer(serializers.Serializer):
     phone = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    def validate(self, attrs):
+        phone = attrs.get("phone")
+        password = attrs.get("password")
+
+        try:
+            user = User.objects.get(phone=phone)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Telefon yoki parol noto‘g‘ri")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Telefon yoki parol noto‘g‘ri")
+
+        if not user.is_active:
+            raise serializers.ValidationError("Foydalanuvchi faol emas")
+
+        # 🔑 MUHIM
+        attrs["user"] = user
+        return attrs
 
 
 
