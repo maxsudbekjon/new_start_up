@@ -18,25 +18,12 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
-          source: "./"
+          source: "."
           target: ${{ secrets.DEPLOY_PATH }}
-          strip_components: 0
           overwrite: true
-          exclude: |
-            .git*
-            .github
-            .env
-            media
-            logs
-            __pycache__
-            *.pyc
-            *.pyo
-            db.sqlite3
 
       - name: Rebuild and restart containers
         uses: appleboy/ssh-action@v1.0.0
-        env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -44,11 +31,6 @@ jobs:
           script_stop: true
           script: |
             set -e
-            APP_DIR="${DEPLOY_PATH:-/root/www/myproject/new_start_up}"
-            compose_cmd="docker compose"
-            if ! command -v docker &>/dev/null || ! docker compose version &>/dev/null; then
-              compose_cmd="docker-compose"
-            fi
-            cd "$APP_DIR"
-            $compose_cmd down
-            $compose_cmd up -d --build
+            cd "${{ secrets.DEPLOY_PATH }}"
+            docker compose down
+            docker compose up -d --build
