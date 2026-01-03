@@ -1,0 +1,137 @@
+import os
+import django
+import random
+from datetime import date
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
+from accounts.models import User, Profile
+from location.models import Region, District
+from task.models import Program, Do, Task, CompleteTask
+from vocab.models import Vocab, Language
+from library.models import Book
+
+
+def run():
+    print("🚀 Seeding started...")
+
+    # -------- Regions & Districts --------
+    regions = []
+    for i in range(10):
+        region, _ = Region.objects.get_or_create(name=f"Region {i}")
+        regions.append(region)
+
+        for j in range(10):
+            District.objects.get_or_create(
+                region=region,
+                name=f"District {i}-{j}"
+            )
+
+    print("✅ Regions & Districts")
+
+    # -------- Users & Profiles --------
+    users = []
+    for i in range(100):
+        phone = f"+99890000{i:03}"
+        user, _ = User.objects.get_or_create(
+            phone=phone,
+            defaults={
+                "username": f"user_{i}",
+                "age": random.randint(18, 50),
+                "level": random.choice(["initial", "medium", "high"]),
+                "is_active": True,
+            }
+        )
+        users.append(user)
+
+    print("✅ Users")
+
+    districts = list(District.objects.all())
+
+    for user in users:
+        Profile.objects.update_or_create(
+            user=user,
+            defaults={
+                "bio": "Auto generated bio",
+                "birth_date": date(2000, 1, 1),
+                "location_region": random.choice(regions),
+                "location_district": random.choice(districts),
+            }
+        )
+
+    print("✅ Profiles")
+
+    # -------- Programs & Do --------
+    programs = []
+    for i in range(10):
+        program, _ = Program.objects.get_or_create(title=f"Program {i}")
+        programs.append(program)
+
+    dos = []
+    for i in range(20):
+        do, _ = Do.objects.get_or_create(
+            title=f"Do Task {i}",
+            description="Task description"
+        )
+        dos.append(do)
+
+    print("✅ Program & Do")
+
+    # -------- Tasks --------
+    tasks = []
+    for user in users:
+        for _ in range(5):
+            task = Task.objects.create(
+                user=user,
+                title=random.choice(dos),
+                program=random.choice(programs),
+                count=random.randint(1, 10),
+                is_active=True
+            )
+            tasks.append(task)
+
+    print("✅ Tasks")
+
+    # -------- Completed Tasks --------
+    for task in tasks:
+        if random.choice([True, False]):
+            CompleteTask.objects.create(
+                user=task.user,
+                task=task,
+                spent_time=random.randint(5, 120)
+            )
+
+    print("✅ CompleteTask")
+
+    # -------- Vocab & Language --------
+    vocabs = []
+    for i in range(100):
+        vocab = Vocab.objects.create(
+            word_1=f"word_{i}",
+            word_uz=f"so‘z_{i}",
+            text_1="Example text",
+            text_uz="Misol matn"
+        )
+        vocabs.append(vocab)
+
+        Language.objects.create(
+            name=random.choice(["english", "russian", "arabic", "turkish"]),
+            vocab=vocab
+        )
+
+    print("✅ Vocab & Language")
+
+    # -------- Books --------
+    for i in range(50):
+        Book.objects.create(
+            name=f"Book {i}",
+            description="Book description"
+        )
+
+    print("✅ Books")
+    print("🎯 Seeding completed successfully.")
+
+
+if __name__ == "__main__":
+    run()

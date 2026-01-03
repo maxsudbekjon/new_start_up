@@ -1,36 +1,54 @@
-name: Deploy to Contabo
+name: Deploy
 
 on:
   push:
     branches:
-      - main  # yoki siz ishlatadigan branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Copy files to server
-      uses: appleboy/ssh-action@v0.1.9
-      with:
-        host: ${{ 194.146.13.93 }}
-        username: ${{ root }}
-        key: ${{ AAAAC3NzaC1lZDI1NTE5AAAAIFAAr8QJSv/blbslhAojujw5W67auspVIuteCZOa+NkE }}
-        port: 22
-        source: "./"
-        target: "/root/www/myproject/new_start_up/"
+      - name: Sync project to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "./"
+          target: ${{ secrets.DEPLOY_PATH }}
+          strip_components: 0
+          overwrite: true
+          exclude: |
+            .git*
+            .github
+            .env
+            media
+            logs
+            __pycache__
+            *.pyc
+            *.pyo
+            db.sqlite3
 
-    - name: Restart Docker containers
-      uses: appleboy/ssh-action@v0.1.9
-      with:
-        host: ${{ 194.146.13.93 }}
-        username: ${{ root }}
-        key: ${{ AAAAC3NzaC1lZDI1NTE5AAAAIFAAr8QJSv/blbslhAojujw5W67auspVIuteCZOa+NkE }}
-        port: 22
-        script: |
-          cd /root/www/myproject/new_start_up/
-          docker-compose down
-          docker-compose up -d --build
+      - name: Rebuild and restart containers
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script_stop: true
+          script: |
+            set -e
+            APP_DIR="${DEPLOY_PATH:-/root/www/myproject/new_start_up}"
+            compose_cmd="docker compose"
+            if ! command -v docker &>/dev/null || ! docker compose version &>/dev/null; then
+              compose_cmd="docker-compose"
+            fi
+            cd "$APP_DIR"
+            $compose_cmd down
+            $compose_cmd up -d --build
