@@ -55,20 +55,33 @@ else:
     MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware", )
 
 ROOT_URLCONF = 'config.urls'
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:62856",
-    "http://127.0.0.1:62856",
-]
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", False)
+CORS_ALLOWED_ORIGINS = env.list(
+    "CORS_ALLOWED_ORIGINS",
+    [
+        "http://localhost:62739",
+        "http://127.0.0.1:62739",
+    ],
+)
+CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", False)
 
-CORS_ALLOW_HEADERS = [
-    "authorization",
-    "content-type",
-    "accept",
-    "origin",
-    "x-csrftoken",
-]
+CORS_ALLOW_HEADERS = env.list(
+    "CORS_ALLOW_HEADERS",
+    [
+        "authorization",
+        "content-type",
+        "accept",
+        "origin",
+        "x-csrftoken",
+    ],
+)
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    [
+        "http://localhost:62739",
+        "http://127.0.0.1:62739",
+    ],
+)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
