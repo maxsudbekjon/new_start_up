@@ -11,7 +11,7 @@ from task.views.task_view import AddTaskAPIView, CompleteTaskView, ListTaskAPIVi
 #   TASK
 urlpatterns = [
     path('add_task/', AddTaskAPIView.as_view()),
-    path("get/do/program<str:program>",GetTaskProgram.as_view()),
+    path("get/do/program/<str:program>/", GetTaskProgram.as_view()),
     path('get_task_list/', ListTaskAPIView.as_view()),
     path('update_task/<int:pk>/', UpdateTaskAPIView.as_view()),
     path('delete_task/<int:pk>/', DeleteTaskAPIView.as_view()),
@@ -41,4 +41,3 @@ urlpatterns+=[
     path('stats/monthly/', MonthlyCompleteTaskAPIView.as_view(), name='monthly-complete-tasks'),
     path('stats/yearly/', YearlyCompleteTaskAPIView.as_view(), name='yearly-complete-tasks'),
 ]
-

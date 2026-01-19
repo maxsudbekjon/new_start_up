@@ -35,8 +35,8 @@ class ListProgramAPIView(generics.ListAPIView):
 class GetTaskProgram(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        path_program = request.query_params.get("program")
+    def get(self, request, program=None):
+        path_program = program or request.query_params.get("program")
 
         filters = {"user": request.user, "is_active": True}
         if path_program:
@@ -104,5 +104,4 @@ class GetTaskProgram(APIView):
         else:
             result["task"] = task_title
             return Response(result, status=200)
-
 
