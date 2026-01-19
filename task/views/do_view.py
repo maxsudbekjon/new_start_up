@@ -10,7 +10,7 @@ from rest_framework import generics
 
 
 @extend_schema(tags=["Task"])
-class DoCreateAPIView(generics.CreateAPIView):
+class AddDoAPIView(generics.CreateAPIView):
     queryset = Do.objects.all()
     serializer_class = DoSerializer
     permission_classes = [IsAuthenticated]

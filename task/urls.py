@@ -1,6 +1,6 @@
 from django.urls import path
 from task.views.complate_view import  MonthlyCompleteTaskAPIView, TodayCompletedTasksCountView, UserTaskHistoryView, WeeklyCompleteTaskAPIView, YearlyCompleteTaskAPIView
-from task.views.do_view import AddDoAPIView, ListDoAPIView
+from task.views.do_view import  AddDoAPIView, ListDoAPIView
 from task.views.program_view import  GetTaskProgram, ListProgramAPIView
 from task.views.task_view import AddTaskAPIView, CompleteTaskView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
 
