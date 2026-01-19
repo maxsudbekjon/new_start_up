@@ -100,14 +100,7 @@ class GetTaskProgram(APIView):
             })
             return Response(result, status=200)
 
-        elif task_title == "o‘tirib turish":
-            result["special_task"] = "O‘tirib turish bajarildi (OpenCV ishga tushdi)"
-            return Response(result, status=200)
-
-        elif task_title == "atjimaniya qilish":
-            result["special_task"] = "Atjimaniya bajarildi (OpenCV ishga tushdi)"
-            return Response(result, status=200)
-
+        
         else:
             result["task"] = task_title
             return Response(result, status=200)

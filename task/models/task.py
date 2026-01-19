@@ -11,11 +11,17 @@ class Program(BasicClass):
 
 
 class Do(BasicClass):
-    title = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
+    title = models.CharField(max_length=255, db_index=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Task"
+        verbose_name_plural = "Tasks"
 
     def __str__(self):
         return self.title
+
 
 
 class Task(BasicClass):
@@ -26,6 +32,7 @@ class Task(BasicClass):
     # duration = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     is_complete = models.BooleanField(default=False)
+    book=models.ForeignKey("vocab.Book",on_delete=models.SET_NULL,null=True,blank=True)
 
     def __str__(self):
         return str(self.title)

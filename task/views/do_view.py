@@ -9,27 +9,15 @@ from rest_framework import generics
 
 
 
-@extend_schema(tags=["Task yaratish"], request=DoSerializer)
-class AddDoAPIView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+@extend_schema(tags=["Task"])
+class DoCreateAPIView(generics.CreateAPIView):
+    queryset = Do.objects.all()
     serializer_class = DoSerializer
-
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
-
-
-@extend_schema(tags=["Task yaratish"])
-class ListDoAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = DoSerializer
 
-    def get(self, request):
-        do_list = Do.objects.all()
-        if not do_list:
-            return Response({"error": "not any Do found.!"}, status=404)
-        serializer = self.get_serializer(do_list, many=True)
-        return Response(serializer.data, status=200)
+
+@extend_schema(tags=["Task"])
+class ListDoAPIView(generics.ListAPIView):
+    queryset=Do.objects.all()
+    serializer_class=DoSerializer
+    permission_classes=[IsAuthenticated]
