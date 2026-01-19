@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
@@ -11,7 +12,7 @@ def health(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/', SpectacularAPIView.as_view(permission_classes=[AllowAny]), name='schema'),
     path("chaining/", include("smart_selects.urls")),
 
     path('accounts/', include('accounts.urls')),
@@ -19,7 +20,7 @@ urlpatterns = [
 
     path("health/", health),
 
-    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('', SpectacularSwaggerView.as_view(url_name='schema', permission_classes=[AllowAny]), name='swagger-ui'),
 ]
 
 if settings.DEBUG:
