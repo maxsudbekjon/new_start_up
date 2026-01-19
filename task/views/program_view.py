@@ -10,7 +10,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from django.utils import timezone
 from task.serializers.task_serializer import  VocabSerializer
-from vocab.models.book import Book
+from vocab.models.book import Book, BookProgress
 from vocab.models.vocab import Vocab
 
 
@@ -71,7 +71,7 @@ class GetTaskProgram(APIView):
             return Response(result, status=200)
 
         elif getattr(task, "book", None) is not None:
-            progress, _ = Book.objects.get_or_create(user=request.user, book=task.book)
+            progress, _ = BookProgress.objects.get_or_create(user=request.user, book=task.book)
             pages_text = []
 
             with open(task.book.book.path, "rb") as f:
@@ -104,4 +104,3 @@ class GetTaskProgram(APIView):
         else:
             result["task"] = task_title
             return Response(result, status=200)
-
