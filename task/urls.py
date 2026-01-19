@@ -3,6 +3,7 @@ from task.views.complate_view import  MonthlyCompleteTaskAPIView, TodayCompleted
 from task.views.do_view import  AddDoAPIView, ListDoAPIView
 from task.views.program_view import  GetTaskProgram, ListProgramAPIView
 from task.views.task_view import AddTaskAPIView, CompleteTaskView, ListTaskAPIView, UpdateTaskAPIView, DeleteTaskAPIView
+from vocab.views.book_list import BookListAPIView
 
 
 
@@ -40,4 +41,8 @@ urlpatterns+=[
     path('stats/weekly/', WeeklyCompleteTaskAPIView.as_view(), name='weekly-complete-tasks'),
     path('stats/monthly/', MonthlyCompleteTaskAPIView.as_view(), name='monthly-complete-tasks'),
     path('stats/yearly/', YearlyCompleteTaskAPIView.as_view(), name='yearly-complete-tasks'),
+]
+urlpatterns+=[
+    path("book/list",BookListAPIView.as_view(),name="book-list")
+    
 ]
