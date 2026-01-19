@@ -10,3 +10,4 @@ class BookListAPIView(generics.ListAPIView):
     queryset=Book.objects.all()
     serializer_class=BookModelSerializer
     permission_classes=[IsAuthenticated]
+    
