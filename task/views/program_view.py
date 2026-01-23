@@ -104,3 +104,48 @@ class GetTaskProgram(APIView):
         else:
             result["task"] = task_title
             return Response(result, status=200)
+
+
+@extend_schema(tags=["Task yaratish"])
+class GetVocabProgram(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, program=None):
+        path_program = program or request.query_params.get("program")
+
+        filters = {"user": request.user, "is_active": True}
+        if path_program:
+            filters["program__title"] = path_program
+
+        task = Task.objects.filter(**filters).first()
+        if not task:
+            return Response({"error": "task topilmadi"}, status=404)
+
+        requested_count = request.query_params.get("count")
+        if requested_count is not None:
+            try:
+                requested_count = int(requested_count)
+            except (TypeError, ValueError):
+                return Response({"error": "count raqam bo'lishi kerak"}, status=400)
+            if requested_count <= 0:
+                return Response({"error": "count 0 dan katta bo'lishi kerak"}, status=400)
+
+        count = requested_count if requested_count is not None else task.count
+
+        vocabs = Vocab.objects.all()
+        if getattr(task, "language", None) is not None:
+            vocabs = vocabs.filter(language=task.language)
+
+        vocabs = list(vocabs)
+        if not vocabs:
+            return Response({"error": "vocab topilmadi"}, status=404)
+
+        sample_count = min(len(vocabs), count)
+        vocabs = random.sample(vocabs, sample_count)
+
+        return Response({
+            "task": task.title.title,
+            "program": task.program.title,
+            "count": sample_count,
+            "vocabs": VocabSerializer(vocabs, many=True).data
+        }, status=200)
