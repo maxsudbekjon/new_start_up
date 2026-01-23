@@ -13,7 +13,7 @@ from vocab.views.book_list import BookListAPIView
 urlpatterns = [
     path('add_task/', AddTaskAPIView.as_view()),
     path("get/do/program/<str:program>/", GetTaskProgram.as_view()),
-    path("get/vocab/program/<str:program>/", GetVocabProgram.as_view()),
+    # path("get/vocab/program/<str:program>/", GetVocabProgram.as_view()),
     path('get_task_list/', ListTaskAPIView.as_view()),
     path('update_task/<int:pk>/', UpdateTaskAPIView.as_view()),
     path('delete_task/<int:pk>/', DeleteTaskAPIView.as_view()),
