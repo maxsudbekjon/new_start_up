@@ -32,7 +32,8 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "program",
             "program_image",
             "count",
-            "is_active"
+            "is_active",
+            "is_complete"
     
         ]
 

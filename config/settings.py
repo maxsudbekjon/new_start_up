@@ -199,6 +199,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.payment.tasks.check_monthly_payments",
         "schedule": crontab(minute=0, hour=0),  # har soatda bir marta
     },
+    "reset-active-tasks-daily-4am": {
+        "task": "task.tasks.reset_active_tasks_daily",
+        "schedule": crontab(minute=0, hour=4),  # har kuni soat 04:00
+    },
 }
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),

@@ -22,6 +22,9 @@ class AddTaskAPIView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data, context={"request": request})
         if serializer.is_valid(raise_exception=True):
             user_age = request.user.age
+            program=serializer.validates_data.get("program")
+            if Task.objects.filter(program=program).exists():
+                return Response({"error":"Bitta ilovaga 1 ta task"})
             count = serializer.validated_data.get('count')
             a = 5
             b = 10
@@ -95,6 +98,7 @@ class CompleteTaskView(APIView):
             return Response({"error": "Task topilmadi"}, status=404)
 
         # Boshlanish va tugash vaqtlarini olish
+        task.is_complete=True
         start_time = serializer.validated_data.get("start_time")  # int (timestamp)
         end_time = serializer.validated_data.get("end_time")      # int (timestamp)
 

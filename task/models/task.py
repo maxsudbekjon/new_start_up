@@ -3,7 +3,7 @@ from vocab.models.language import Language
 
 
 class Program(BasicClass):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255,unique=True)
     image = models.ImageField(upload_to='images/', blank=True, null=True)
 
     def __str__(self):
@@ -11,7 +11,7 @@ class Program(BasicClass):
 
 
 class Do(BasicClass):
-    title = models.CharField(max_length=255, db_index=True)
+    title = models.CharField(max_length=255, db_index=True,unique=True)
     description = models.TextField(blank=True)
 
     class Meta:
