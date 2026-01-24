@@ -28,8 +28,8 @@ services:
       retries: 5
       start_period: 60s 
     depends_on:
-#      db:
-#       condition: service_healthy
+     db:
+      condition: service_healthy
       redis:
         condition: service_healthy
       mq:
@@ -50,28 +50,28 @@ services:
         max-size: "10m"
         max-file: "3"
 
-#  db:
-#    image: postgres:15
-#    container_name: qadam_db
-#    restart: always
-#    env_file:
-#      - ./.env
-#    environment:
-#      POSTGRES_DB: ${POSTGRES_DB}
-#      POSTGRES_USER: ${POSTGRES_USER}
-#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-#    volumes:
-#      - ./postgres_data:/var/lib/postgresql/data
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#    logging:
-#      driver: "json-file"
-#      options:
-#        max-size: "10m"
-#        max-file: "3"
+  db:
+    image: postgres:15
+    container_name: qadam_db
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   mq:
     image: rabbitmq:3-management
