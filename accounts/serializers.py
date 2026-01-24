@@ -1,4 +1,3 @@
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.password_validation import validate_password
@@ -7,22 +6,7 @@ from accounts.models.profile import Profile
 User = get_user_model()
 
 
-
-
-
-from django.contrib.auth import authenticate
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
-
-
-from django.contrib.auth import authenticate
-from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
-
-
-from django.contrib.auth import authenticate
-from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class LoginSerializer(serializers.Serializer):

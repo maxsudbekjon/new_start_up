@@ -4,9 +4,16 @@ from task.serializers.task_serializer import ComplatetasTimeSerializer, ListTask
 from rest_framework.permissions import IsAuthenticated
 from task.models.task import Task
 from task.models.complete_task import CompleteTask
-from task.utils import calculate_streak
+
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
+
+from task.services.task_limits import validate_task_count
+
 
 
 
@@ -18,37 +25,32 @@ class AddTaskAPIView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TaskSerializer
 
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data, context={"request": request})
-        if serializer.is_valid(raise_exception=True):
-            user_age = request.user.age
-            program=serializer.validates_data.get("program")
-            if Task.objects.filter(program=program).exists():
-                return Response({"error":"Bitta ilovaga 1 ta task"})
-            count = serializer.validated_data.get('count')
-            a = 5
-            b = 10
-            c = 15
-            completions = (
-                CompleteTask.objects.filter(user=request.user).order_by("completed_at").values_list("completed_at", flat=True)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            data=request.data,
+            context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        result = validate_task_count(
+            user=request.user,
+            program=serializer.validated_data["program"],
+            count=serializer.validated_data["count"],
+        )
+
+        if not result.allowed:
+            return Response(
+                {"message": result.message},
+                status=status.HTTP_400_BAD_REQUEST
             )
-            max_value = calculate_streak(list(completions))
 
-            if max_value >= 1:
-                a += 3
-                b += 3
-                c += 3
+        task = serializer.save(user=request.user)
 
-            if user_age <= 10 and count > a:
-                return Response({"message": f"10 yoshdan kichiklar uchun maksimal {a}"}, status=400)
-            elif 10 < user_age < 20 and count > b:
-                return Response({"message": f"10 va 19 yoshgacha maksimal {b}"}, status=400)
-            elif user_age >= 20 and count > c:
-                return Response({"message": f"20 yoshdan kattalar uchun maksimal {c}"}, status=400)
-
-            task = serializer.save(user=request.user)
-            return Response(self.get_serializer(task).data, status=201)
-        return Response(serializer.errors, status=400)
+        response_serializer = self.get_serializer(task)
+        return Response(
+            response_serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
 
 @extend_schema(tags=["Tasklar ro'yxati"])

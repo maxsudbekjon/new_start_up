@@ -1,13 +1,7 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth import authenticate
-from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import get_user_model
 from accounts.models.profile import Profile
@@ -15,51 +9,50 @@ from drf_spectacular.utils import extend_schema
 from accounts.models.rating import Rating
 from accounts.serializers import CustomUserSerializer, ProfileSerializer, RatingSerializer, UserDetailModelSerializer,LoginSerializer
 from task.models.complete_task import CompleteTask
-from django.utils.decorators import method_decorator
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
 from django.db.models import Sum
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics
 User = get_user_model()
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 @extend_schema(request=CustomUserSerializer)
-class RegisterApiView(APIView):
+class RegisterApiView(generics.CreateAPIView):
     permission_classes = [AllowAny]
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
 
-    def post(self, request):
-        serializer = CustomUserSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # def post(self, request):
+    #     serializer = CustomUserSerializer(data=request.data)
+    #
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @extend_schema(request=ProfileSerializer)
-class UpdateUserProfileAPIView(APIView):
+class UpdateUserProfileAPIView(generics.UpdateAPIView):
+    serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
-        user_profile = Profile.objects.get(user=request.user)
-
-        serializer = ProfileSerializer(user_profile, data=request.data, partial=True)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=200)
-        return Response(serializer.errors, status=400)
+    def get_object(self):
+        return get_object_or_404(
+            Profile.objects.select_related("user"),
+            user=self.request.user
+        )
 
 @extend_schema(tags=["User"])
-class UserDetailAPIView(APIView):
+class UserDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
+    queryset = User.objects.all()
+    serializer_class = UserDetailModelSerializer
 
-    def get(self, request):
-        user = get_object_or_404(User, id=request.user.id)
-        serializer = UserDetailModelSerializer(user)
-        return Response(serializer.data)
-    
+    # def get(self, request):
+    #     user = get_object_or_404(User, id=request.user.id)
+    #     serializer = UserDetailModelSerializer(user)
+    #     return Response(serializer.data)
+    #
 
 
 

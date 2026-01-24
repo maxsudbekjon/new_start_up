@@ -6,10 +6,6 @@ from vocab.models.vocab import Vocab
 
 
 
-
-
-
-
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task

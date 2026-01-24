@@ -1,4 +1,3 @@
-
 import os, socket
 from pathlib import Path
 from environs import Env
@@ -9,12 +8,11 @@ env.read_env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = env.str("SECRET_KEY")
-DEBUG = env.bool("DEBUG")
+SECRET_KEY = env.str("SECRET_KEY", default=None)
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost"])
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -62,9 +60,7 @@ CORS_ALLOWED_ORIGINS = env.list(
     default=[]
 )
 
-CORS_ALLOW_CREDENTIALS = env.bool(
-    "CORS_ALLOW_CREDENTIALS", False
-)
+CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", False)
 
 CORS_ALLOW_HEADERS = env.list(
     "CORS_ALLOW_HEADERS",
@@ -100,8 +96,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.User'
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DBS = {
     'SQLITE': {
@@ -113,8 +107,8 @@ DBS = {
         'NAME': env.str("DB_NAME"),
         'USER': env.str("DB_USER"),
         'PASSWORD': env.str("DB_PASSWORD"),
-        'HOST': env.str("DB_HOST"),
-        'PORT': env.str("DB_PORT"),
+        "HOST": env.str("DB_HOST", default="localhost"),
+        "PORT": env.int("DB_PORT", default=5432),
     }
 }
 
@@ -122,8 +116,6 @@ DATABASES = {
     'default': DBS.get(env.str('DB_TYPE', 'SQLITE'))
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -157,6 +149,8 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 if not DEBUG:
+    if not SECRET_KEY:
+        raise RuntimeError("SECRET_KEY must be set in production")
     STORAGES = {
         # ...
         "staticfiles": {
@@ -168,6 +162,20 @@ if not DEBUG:
         }
     }
     WHITENOISE_KEEP_ONLY_HASHED_FILES = False
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False
+    SESSION_COOKIE_SAMESITE = env.str("SESSION_COOKIE_SAMESITE", default="Lax")
+    CSRF_COOKIE_SAMESITE = env.str("CSRF_COOKIE_SAMESITE", default="Lax")
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "same-origin"
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=3600)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=True)
+    SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -184,7 +192,7 @@ except:
 REDIS_HOST = env.str("REDIS_HOST", "redis")
 REDIS_PORT = env.int("REDIS_PORT", 6379)
 REDIS_DB = env.int("REDIS_DB", 0)
-REDIS_URL = f'{REDIS_HOST}://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+REDIS_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
 
 # Celery settings
 CELERY_BROKER_URL = env.str('CELERY_BROKER_URL', default="redis://redis:6379/0")  # Используем Redis
@@ -268,9 +276,11 @@ LOGGING = {
 
 
 REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+    if not DEBUG
+    else (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -291,11 +301,10 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Your ',
-    'DESCRIPTION': 'Your project description',
+    'TITLE': 'Qadam ',
+    'DESCRIPTION': 'Qadam loyihasi',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    # OTHER SETTINGS
 }
 
 
@@ -309,6 +318,6 @@ CACHES = {
     }
 }
 
-ESKIZ_API_TOKEN =env.str('ESKIZ_API_TOKEN')
-ESKIZ_API_URL = env.str('ESKIZ_API_URL')
-ESKIZ_FROM = env.str('ESKIZ_FROM')
+ESKIZ_API_TOKEN =os.environ.get("ESKIZ_API_TOKEN")
+ESKIZ_API_URL = os.environ.get("ESKIZ_API_URL")
+ESKIZ_FROM = os.environ.get("ESKIZ_FROM")

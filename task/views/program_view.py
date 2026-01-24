@@ -10,9 +10,9 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from django.utils import timezone
 from task.serializers.task_serializer import  VocabSerializer
-from vocab.models.book import Book, BookProgress
+from vocab.models.book import BookProgress
 from vocab.models.vocab import Vocab
-
+from vocab.serializers import VocabSerializer
 
 
 
@@ -25,11 +25,6 @@ class ListProgramAPIView(generics.ListAPIView):
     serializer_class = ProgramSerializer
     queryset = Program.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return Response({"message": "not any program found"}, status=200)
-        return super().list(request, *args, **kwargs)
 
 
 class GetTaskProgram(APIView):

@@ -16,7 +16,7 @@ from rest_framework import status
 
 @extend_schema(tags=["Bosh sahifa"])
 class TodayCompletedTasksCountView(APIView):
-    permission_classes = [IsAuthenticated]  # faqat login bo‘lgan user ko‘ra oladi
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         today = timezone.now().date()
@@ -32,11 +32,11 @@ class UserTaskHistoryView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        today = timezone.now().date()  # bugungi sana
+        today = timezone.now().date()
 
         completed = CompleteTask.objects.filter(
             user=request.user,
-            completed_at__date=today   # faqat bugungi
+            completed_at__date=today
         ).values(
             "spent_time", 
         )
