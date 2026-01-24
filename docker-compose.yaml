@@ -21,7 +21,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "python - <<EOF\nimport urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/')\nEOF"
+          "python - <<'EOF'\nimport urllib.request\nreq = urllib.request.Request('http://127.0.0.1:8000/health/', headers={'X-Forwarded-Proto': 'https'})\nurllib.request.urlopen(req, timeout=3)\nEOF"
         ]
       interval: 10s
       timeout: 5s
