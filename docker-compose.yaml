@@ -49,7 +49,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
   db:
     image: postgres:15
     container_name: qadam_db
