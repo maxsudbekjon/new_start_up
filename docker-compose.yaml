@@ -11,15 +11,11 @@ services:
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
              gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+
     volumes:
       - ./staticfiles:/app/staticfiles
       - ./media:/app/media
       - ./logs:/app/logs
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
     healthcheck:
       test:
@@ -30,6 +26,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 60s 
     depends_on:
 #      db:
 #       condition: service_healthy
