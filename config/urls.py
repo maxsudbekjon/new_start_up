@@ -18,8 +18,8 @@ urlpatterns = [
     path("health/", health),
 ]
 
-if settings.DEBUG:
-    urlpatterns += [
+# if settings.DEBUG:
+urlpatterns += [
         path('', SpectacularSwaggerView.as_view(url_name='schema', permission_classes=[AllowAny]), name='swagger-ui'),
         path('api/schema/', SpectacularAPIView.as_view(permission_classes=[AllowAny]), name='schema'),
     ]
