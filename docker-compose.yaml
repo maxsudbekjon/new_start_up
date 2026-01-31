@@ -71,7 +71,7 @@ services:
         max-file: "3"
 
   mq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3-alpine
     container_name: qadam_mq
     restart: always
     env_file:
