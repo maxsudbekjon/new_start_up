@@ -30,8 +30,8 @@ services:
 #        condition: service_healthy
       redis:
         condition: service_healthy
-      mq:
-        condition: service_healthy
+#      mq:
+#        condition: service_healthy
 
   redis:
     image: redis:7
@@ -70,21 +70,21 @@ services:
 #        max-size: "10m"
 #        max-file: "3"
 
-  mq:
-    image: rabbitmq:3-alpine
-    container_name: qadam_mq
-    restart: always
-    env_file:
-      - ./.env
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+#  mq:
+#    image: rabbitmq:3-alpine
+#    container_name: qadam_mq
+#    restart: always
+#    env_file:
+#      - ./.env
+#    environment:
+#      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+#      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+#    healthcheck:
+#      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 10
+#      start_period: 30s
 
   nginx:
     image: nginx:latest
