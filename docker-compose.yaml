@@ -96,7 +96,6 @@ services:
     restart: always
     ports:
       - "8020:80"
-      - "443:443"
     depends_on:
       web:
         condition: service_healthy
