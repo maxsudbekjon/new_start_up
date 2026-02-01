@@ -186,7 +186,7 @@ try:
     INTERNAL_IPS += [ip[:-1] + "1" for ip in ips]
 except:
     pass
-
+USE_X_FORWARDED_HOST = True
 
 # redis settings
 REDIS_HOST = env.str("REDIS_HOST", "redis")
