@@ -27,12 +27,8 @@ DB_PORT=5432
 REDIS_HOST=redis
 REDIS_PORT=6379
 REDIS_DB=0
-
-RABBITMQ_USER=guest
-RABBITMQ_PASS=guest
-
-CELERY_BROKER_URL=amqp://guest:guest@mq:5672/
-CELERY_RESULT_BACKEND=redis://redis:6379/0
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/1
 ```
 
 ```bash
