@@ -47,17 +47,12 @@ class UserDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserDetailModelSerializer
-    # lookup_field = "pk"
 
-    def get_object(self):
-        # Return the authenticated user since the URL has no lookup kwarg.
-        return self.request.user
-
-    # def get(self, request):
-    #     user = get_object_or_404(User, id=request.user.id)
-    #     serializer = UserDetailModelSerializer(user)
-    #     return Response(serializer.data)
-    #
+    def get(self, request):
+        user = get_object_or_404(User, id=request.user.id)
+        serializer = UserDetailModelSerializer(user)
+        return Response(serializer.data)
+    
 
 
 
