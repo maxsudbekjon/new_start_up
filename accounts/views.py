@@ -47,7 +47,7 @@ class UserDetailAPIView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserDetailModelSerializer
-    lookup_field = "pk"
+    # lookup_field = "pk"
 
     def get_object(self):
         # Return the authenticated user since the URL has no lookup kwarg.
