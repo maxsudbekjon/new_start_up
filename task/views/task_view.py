@@ -4,6 +4,10 @@ from task.serializers.task_serializer import ComplatetasTimeSerializer, ListTask
 from rest_framework.permissions import IsAuthenticated
 from task.models.task import Task
 from task.models.complete_task import CompleteTask
+from accounts.models.profile import Profile
+from accounts.models.rating import Rating
+from django.db import transaction
+from django.db.models import F
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
@@ -113,11 +117,22 @@ class CompleteTaskView(APIView):
 
         spent_time = end_minutes - start_minutes  # sekundlarda hisoblash
 
-        complete_task = CompleteTask.objects.create(
-            user=request.user,
-            task=task,
-            spent_time=spent_time
-        )
+        with transaction.atomic():
+            complete_task, created = CompleteTask.objects.get_or_create(
+                user=request.user,
+                task=task,
+                defaults={"spent_time": spent_time},
+            )
+            if not created and complete_task.spent_time != spent_time:
+                complete_task.spent_time = spent_time
+                complete_task.save(update_fields=["spent_time"])
+
+            profile, _ = Profile.objects.get_or_create(
+                user=request.user,
+                defaults={"bio": "this is my bio"},
+            )
+            Profile.objects.filter(id=profile.id).update(score=F("score") + 5)
+            Rating.objects.create(point=5, user_profile=profile)
 
         return Response({
             "message": "Task tugallandi",

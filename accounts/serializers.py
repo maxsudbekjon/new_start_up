@@ -32,6 +32,9 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

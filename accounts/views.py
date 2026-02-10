@@ -7,13 +7,14 @@ from django.contrib.auth import get_user_model
 from accounts.models.profile import Profile
 from drf_spectacular.utils import extend_schema
 from accounts.models.rating import Rating
-from accounts.serializers import CustomUserSerializer, ProfileSerializer, RatingSerializer, UserDetailModelSerializer,LoginSerializer
+from accounts.serializers import CustomUserSerializer, ProfileSerializer, RatingSerializer, UserDetailModelSerializer, LoginSerializer, LogoutSerializer
 from task.models.complete_task import CompleteTask
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
 from django.db.models import Sum
 from rest_framework import generics
+from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
 
 
@@ -30,6 +31,21 @@ class RegisterApiView(generics.CreateAPIView):
     #         serializer.save()
     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(request=LogoutSerializer)
+class LogoutApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        refresh = serializer.validated_data["refresh"]
+        token = RefreshToken(refresh)
+        token.blacklist()
+
+        return Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
 
 @extend_schema(request=ProfileSerializer)
 class UpdateUserProfileAPIView(generics.UpdateAPIView):
