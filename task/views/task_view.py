@@ -100,7 +100,8 @@ class CompleteTaskView(APIView):
             return Response({"error": "Task topilmadi"}, status=404)
 
         # Boshlanish va tugash vaqtlarini olish
-        task.is_complete=True
+        task.is_complete = True
+        task.save(update_fields=["is_complete"])
         start_time = serializer.validated_data.get("start_time")  # int (timestamp)
         end_time = serializer.validated_data.get("end_time")      # int (timestamp)
 
@@ -123,4 +124,3 @@ class CompleteTaskView(APIView):
             "task": task.title.title,
             "spent_time": spent_time
         }, status=201)
-
