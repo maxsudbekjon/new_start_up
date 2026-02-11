@@ -111,9 +111,13 @@ class CompleteTaskView(APIView):
         start_time = serializer.validated_data["start_time"]
         end_time = serializer.validated_data["end_time"]
 
-        spent_time = int((end_time - start_time).total_seconds())
-
         today = timezone.localdate()
+        start_dt = datetime.datetime.combine(today, start_time)
+        end_dt = datetime.datetime.combine(today, end_time)
+        if end_dt < start_dt:
+            end_dt = end_dt + datetime.timedelta(days=1)
+
+        spent_time = int((end_dt - start_dt).total_seconds())
 
         with transaction.atomic():
             qs = (
