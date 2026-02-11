@@ -93,7 +93,7 @@ class DeleteTaskAPIView(APIView):
             task.delete()
             return Response({"message": "task deleted successfully"}, status=200)
         except Task.DoesNotExist:
-            return Response({"error": "task not found"}, status=404)
+            return Response({"error": "task not found"}, status=404),
 
 
 @extend_schema(tags=["Task bajarish uchun ketgan vaqt"], request=ComplatetasTimeSerializer)
@@ -102,34 +102,29 @@ class CompleteTaskView(APIView):
 
     def post(self, request, task_id):
         serializer = ComplatetasTimeSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
+        serializer.is_valid(raise_exception=True)
 
         task = Task.objects.filter(id=task_id, user=request.user).first()
         if not task:
             return Response({"error": "Task topilmadi"}, status=404)
 
-        # Boshlanish va tugash vaqtlarini olish
-        # task.is_complete = True
-        # task.save(update_fields=["is_complete"])
-        start_time = serializer.validated_data.get("start_time")  # int (timestamp)
-        end_time = serializer.validated_data.get("end_time")      # int (timestamp)
+        start_time = serializer.validated_data["start_time"]
+        end_time = serializer.validated_data["end_time"]
 
-        if not start_time or not end_time:
-            return Response({"error": "start_time va end_time yuboring"}, status=400)
+        spent_time = int((end_time - start_time).total_seconds())
 
-        start_minutes = start_time.hour * 60 + start_time.minute
-        end_minutes = end_time.hour * 60 + end_time.minute
-
-        spent_time = end_minutes - start_minutes  # sekundlarda hisoblash
+        today = timezone.now().date()
 
         with transaction.atomic():
+
             complete_task, created = CompleteTask.objects.get_or_create(
                 user=request.user,
-                # task=task,
+                task=task,
+                completed_date=today,
                 defaults={"spent_time": spent_time},
             )
-            if not created and complete_task.spent_time != spent_time:
+
+            if not created:
                 complete_task.spent_time = spent_time
                 complete_task.save(update_fields=["spent_time"])
 
@@ -137,13 +132,15 @@ class CompleteTaskView(APIView):
                 user=request.user,
                 defaults={"bio": "this is my bio"},
             )
+
             Profile.objects.filter(id=profile.id).update(score=F("score") + 5)
             Rating.objects.create(point=5, user_profile=profile)
 
         return Response({
             "message": "Task tugallandi",
-            # "task": task.title.title,
-            "spent_time": spent_time
+            "task_id": task.id,
+            "spent_time_seconds": spent_time,
+            "completed_date": today
         }, status=201)
 
 
