@@ -146,6 +146,7 @@ class CompleteTaskView(APIView):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 @extend_schema(tags=["Tasklar ro'yxati"])
 def complete_task(request):
     today = timezone.now().date()
