@@ -1,5 +1,9 @@
+from dateutil.utils import today
+from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
+from task.serializers import CompleteTaskSerializer
 from task.serializers.task_serializer import ComplatetasTimeSerializer, ListTaskSerializer, TaskSerializer
 from rest_framework.permissions import IsAuthenticated
 from task.models.task import Task
@@ -8,7 +12,7 @@ from accounts.models.profile import Profile
 from accounts.models.rating import Rating
 from django.db import transaction
 from django.db.models import F
-
+import datetime
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from rest_framework import generics, status
@@ -104,8 +108,8 @@ class CompleteTaskView(APIView):
             return Response({"error": "Task topilmadi"}, status=404)
 
         # Boshlanish va tugash vaqtlarini olish
-        task.is_complete = True
-        task.save(update_fields=["is_complete"])
+        # task.is_complete = True
+        # task.save(update_fields=["is_complete"])
         start_time = serializer.validated_data.get("start_time")  # int (timestamp)
         end_time = serializer.validated_data.get("end_time")      # int (timestamp)
 
@@ -139,3 +143,16 @@ class CompleteTaskView(APIView):
             "task": task.title.title,
             "spent_time": spent_time
         }, status=201)
+
+
+@api_view(["GET"])
+@extend_schema(tags=["Tasklar ro'yxati"])
+def complete_task(request):
+    today = timezone.now().date()
+
+    complete_tasks = CompleteTask.objects.filter(
+        completed_at__date=today
+    )
+
+    serializer = TaskCompleteForSerializer(complete_tasks, many=True)
+    return Response(serializer.data)

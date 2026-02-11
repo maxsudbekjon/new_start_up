@@ -14,3 +14,8 @@ class CompleteTaskSerializer(serializers.ModelSerializer):
             'task',
             'completed_at'
         )
+
+class TaskCompleteForSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompleteTask
+        fields = ('id',)
