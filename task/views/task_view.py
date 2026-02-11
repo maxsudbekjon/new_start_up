@@ -126,7 +126,7 @@ class CompleteTaskView(APIView):
         with transaction.atomic():
             complete_task, created = CompleteTask.objects.get_or_create(
                 user=request.user,
-                task=task,
+                # task=task,
                 defaults={"spent_time": spent_time},
             )
             if not created and complete_task.spent_time != spent_time:
@@ -142,7 +142,7 @@ class CompleteTaskView(APIView):
 
         return Response({
             "message": "Task tugallandi",
-            "task": task.title.title,
+            # "task": task.title.title,
             "spent_time": spent_time
         }, status=201)
 
