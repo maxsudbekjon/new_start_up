@@ -16,6 +16,8 @@ class CompleteTaskSerializer(serializers.ModelSerializer):
         )
 
 class TaskCompleteForSerializer(serializers.ModelSerializer):
+    task_id = serializers.IntegerField(source='task.id')
+
     class Meta:
         model = CompleteTask
-        fields = ('id',)
+        fields = ('task_id',)
