@@ -164,7 +164,7 @@ def complete_task(request):
 
     complete_tasks = CompleteTask.objects.filter(
         completed_at__date=today
-    ).values_list('task_id', flat=True)
+    ).values_list('task', flat=True)
 
     serializer = TaskCompleteForSerializer(complete_tasks, many=True)
     return Response(serializer.data)
