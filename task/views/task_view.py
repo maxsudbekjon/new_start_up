@@ -113,18 +113,26 @@ class CompleteTaskView(APIView):
 
         spent_time = int((end_time - start_time).total_seconds())
 
-        today = timezone.now().date()
+        today = timezone.localdate()
 
         with transaction.atomic():
-
-            complete_task, created = CompleteTask.objects.get_or_create(
-                user=request.user,
-                task=task,
-                completed_date=today,
-                defaults={"spent_time": spent_time},
+            qs = (
+                CompleteTask.objects
+                .select_for_update()
+                .filter(user=request.user, task=task, completed_at__date=today)
+                .order_by("id")
             )
 
-            if not created:
+            complete_task = qs.first()
+            if complete_task is None:
+                complete_task = CompleteTask.objects.create(
+                    user=request.user,
+                    task=task,
+                    spent_time=spent_time,
+                )
+            else:
+                # Clean duplicates if they exist for the same day.
+                qs.exclude(id=complete_task.id).delete()
                 complete_task.spent_time = spent_time
                 complete_task.save(update_fields=["spent_time"])
 
