@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from task.models import Task
+from task.models.task import Do, Program
 from vocab.models.book import Book
 from vocab.models.vocab import Vocab
 
@@ -15,10 +16,21 @@ class TaskSerializer(serializers.ModelSerializer):
 
     
 
+class TitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Do
+        fields = ["id", "title"]
+
+
+class ProgramSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Program
+        fields = ["id", "title", "image"]
+
+
 class ListTaskSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(source="title.title", read_only=True)
-    program = serializers.CharField(source="program.title", read_only=True)
-    program_image = serializers.ImageField(source="program.image", read_only=True)
+    title = TitleSerializer(read_only=True)
+    program = ProgramSerializer(read_only=True)
 
     class Meta:
         model = Task
@@ -26,11 +38,9 @@ class ListTaskSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "program",
-            "program_image",
             "count",
             "is_active",
-            "is_complete"
-    
+            "is_complete",
         ]
 
 

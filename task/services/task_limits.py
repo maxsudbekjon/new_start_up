@@ -2,6 +2,8 @@ from typing import NamedTuple
 from task.models.task import Task
 from task.models.complete_task import CompleteTask
 from task.utils import calculate_streak
+
+MAX_STREAK_RECORDS = 60
 class TaskLimitResult(NamedTuple):
     allowed: bool
     max_allowed: int | None
@@ -24,14 +26,14 @@ def validate_task_count(*, user, program, count) -> TaskLimitResult:
         "adult": 15,
     }
 
-    completions = (
+    completions = list(
         CompleteTask.objects
         .filter(user=user)
-        .order_by("completed_at")
-        .values_list("completed_at", flat=True)
+        .order_by("-completed_at")
+        .values_list("completed_at", flat=True)[:MAX_STREAK_RECORDS]
     )
-
-    streak = calculate_streak(list(completions))
+    completions.reverse()
+    streak = calculate_streak(completions)
     bonus = 3 if streak >= 1 else 0
 
     if age <= 10:

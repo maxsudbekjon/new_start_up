@@ -6,6 +6,7 @@ from rest_framework.permissions import AllowAny
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import TemplateView
 
 def health(request):
     return JsonResponse({"status": "ok"})
@@ -16,6 +17,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path("chaining/", include("smart_selects.urls")),
     path("health/", health),
+    path("privacy-policy/", TemplateView.as_view(template_name="privacy_policy.html"), name="privacy-policy"),
 ]
 
 # if settings.DEBUG:

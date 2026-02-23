@@ -12,7 +12,9 @@ from task.models.complete_task import CompleteTask
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, F, Q, Prefetch, Window
+from django.db.models.functions import DenseRank
+from datetime import timedelta
 from rest_framework import generics
 from rest_framework_simplejwt.tokens import RefreshToken
 User = get_user_model()
@@ -83,14 +85,12 @@ class GlobalRatingListView(ListAPIView):
     pagination_class = RatingPagination
 
     def get_queryset(self):
-        # Eng ko‘p ball to‘plaganlardan boshlab tartiblash
-        return Profile.objects.select_related('user').order_by('-score')
-
-    def get_serializer_context(self):
-        # Reytingni aniqlash uchun barcha obyektlarni serializerga yuboramiz
-        context = super().get_serializer_context()
-        context['ranked_profiles'] = list(self.get_queryset())
-        return context
+        return (
+            Profile.objects
+            .select_related('user')
+            .annotate(rank=Window(expression=DenseRank(), order_by=F('score').desc()))
+            .order_by('-score', 'id')
+        )
     
 
 @extend_schema(tags=['reting'])
@@ -101,30 +101,14 @@ class MonthlyRatingListView(ListAPIView):
     def get_queryset(self):
         now = timezone.now()
         month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        # joriy oyda berilgan ballarni yig‘amiz
-        queryset = (
-            Rating.objects.filter(created_at__gte=month_start)
-            .values('user_profile')
-            .annotate(score=Sum('point'))
-            .order_by('-score')
+        return (
+            Profile.objects
+            .select_related('user')
+            .filter(rating__created_at__gte=month_start)
+            .annotate(score=Sum('rating__point', filter=Q(rating__created_at__gte=month_start)))
+            .annotate(rank=Window(expression=DenseRank(), order_by=F('score').desc()))
+            .order_by('-score', 'id')
         )
-
-        # ID bo‘yicha Profile’larni olish
-        profile_ids = [item['user_profile'] for item in queryset]
-        profiles = list(Profile.objects.filter(id__in=profile_ids).select_related('user'))
-
-        # Reytingni tartiblash uchun moslashtirish
-        profiles_sorted = sorted(profiles, key=lambda p: next(q['score'] for q in queryset if q['user_profile'] == p.id), reverse=True)
-
-        # score qiymatini vaqtinchalik o‘rnatamiz
-        for p in profiles_sorted:
-            p.score = next(q['score'] for q in queryset if q['user_profile'] == p.id)
-        return profiles_sorted
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['ranked_profiles'] = self.get_queryset()
-        return context
 
 
 
@@ -134,25 +118,50 @@ class StreakRatingListView(ListAPIView):
     pagination_class = RatingPagination
 
     def get_queryset(self):
-        profiles = Profile.objects.all().select_related('user')
-        data = []
+        lookback_days = 90
+        cutoff = timezone.now() - timedelta(days=lookback_days)
+        completions_qs = (
+            CompleteTask.objects
+            .filter(completed_at__gte=cutoff)
+            .only("completed_at", "user_id")
+            .order_by("-completed_at")
+        )
+        profiles = list(
+            Profile.objects
+            .select_related('user')
+            .prefetch_related(
+                Prefetch(
+                    "user__completetask_set",
+                    queryset=completions_qs,
+                    to_attr="recent_completions",
+                )
+            )
+        )
 
+        data = []
         for profile in profiles:
-            streak = self.calculate_streak(profile)
-            profile.score = streak  # score sifatida ketma-ket kunlar sonini ishlatamiz
+            completions = getattr(profile.user, "recent_completions", [])
+            streak = self.calculate_streak(completions)
+            profile.score = streak
             data.append(profile)
 
         data.sort(key=lambda p: p.score, reverse=True)
+        current_rank = 0
+        last_score = None
+        for idx, profile in enumerate(data, start=1):
+            if profile.score != last_score:
+                current_rank = idx
+                last_score = profile.score
+            profile.rank = current_rank
+
         return data
 
-    def calculate_streak(self, profile):
-        # foydalanuvchining barcha bajarilgan tasklari
-        completions = CompleteTask.objects.filter(user=profile.user).order_by('-completed_at')
-        if not completions.exists():
+    def calculate_streak(self, completions):
+        if not completions:
             return 0
 
         streak = 1
-        prev_date = completions.first().completed_at.date()
+        prev_date = completions[0].completed_at.date()
 
         for comp in completions[1:]:
             current_date = comp.completed_at.date()
@@ -160,11 +169,8 @@ class StreakRatingListView(ListAPIView):
             if diff == 1:
                 streak += 1
                 prev_date = current_date
-            elif diff > 1:
+            elif diff == 0:
+                continue
+            else:
                 break
         return streak
-
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context['ranked_profiles'] = self.get_queryset()
-        return context

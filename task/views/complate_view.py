@@ -5,11 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from task.models import CompleteTask
 from drf_spectacular.utils import extend_schema
 from datetime import  timedelta
-from django.utils.timezone import now
 import calendar
 from rest_framework import status
-
-
+from django.db.models import Count
+from django.db.models.functions import TruncDate, TruncMonth
 
 
 
@@ -50,29 +49,39 @@ class WeeklyCompleteTaskAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        today = now().date()
-        start_of_week = today - timedelta(days=today.weekday() + 7)
-        end_of_week = start_of_week + timedelta(days=6)
 
-        queryset = CompleteTask.objects.filter(user=user, completed_at__date__range=[start_of_week, end_of_week])
-        
-        if not queryset.exists():
-            return Response(
-                {"message": "O‘tgan hafta bajarilgan topshiriqlar yo‘q."},
-                status=status.HTTP_200_OK
-            )
+        today = timezone.localdate()
+        start_of_week = today - timedelta(days=today.weekday() + 7)  # o'tgan hafta dushanba
+        end_of_week = start_of_week + timedelta(days=6)             # o'tgan hafta yakshanba
 
+        # ✅ 1 ta query: kunlar bo'yicha guruhlab sanab beradi
+        qs = (
+            CompleteTask.objects
+            .filter(user=user, completed_at__date__range=[start_of_week, end_of_week])
+            .annotate(day=TruncDate("completed_at"))
+            .values("day")
+            .annotate(count=Count("id"))
+            .order_by("day")
+        )
+
+        # qs -> [{'day': date, 'count': n}, ...]
+        counts_by_day = {row["day"]: row["count"] for row in qs}
+
+        # ✅ bo'sh kunlarni ham 0 bilan to'ldiramiz
         daily_stats = []
         for i in range(7):
             day_date = start_of_week + timedelta(days=i)
-            count = queryset.filter(completed_at__date=day_date).count()
             daily_stats.append({
                 "day": calendar.day_name[day_date.weekday()],
                 "date": str(day_date),
-                "count": count
+                "count": counts_by_day.get(day_date, 0)
             })
-        return Response(daily_stats)
-    
+
+        if sum(item["count"] for item in daily_stats) == 0:
+            return Response({"message": "O‘tgan hafta bajarilgan topshiriqlar yo‘q."}, status=status.HTTP_200_OK)
+
+        return Response(daily_stats, status=status.HTTP_200_OK)
+
 
 @extend_schema(tags=["Statistika"])
 class MonthlyCompleteTaskAPIView(APIView):
@@ -80,36 +89,46 @@ class MonthlyCompleteTaskAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        today = now().date()
+
+        today = timezone.localdate()
         first_day_this_month = today.replace(day=1)
         last_month_last_day = first_day_this_month - timedelta(days=1)
         first_day_last_month = last_month_last_day.replace(day=1)
 
-        queryset = CompleteTask.objects.filter(
-            user=user,
-            completed_at__date__range=[first_day_last_month, last_month_last_day]
+        # ✅ 1 ta query: o'tgan oy ichidagi kunlar bo'yicha guruhlab sanash
+        qs = (
+            CompleteTask.objects
+            .filter(user=user, completed_at__date__range=[first_day_last_month, last_month_last_day])
+            .annotate(day=TruncDate("completed_at"))
+            .values("day")
+            .annotate(count=Count("id"))
+            .order_by("day")
         )
 
-        if not queryset.exists():
-            return Response(
-                {"message": "O‘tgan oyda bajarilgan topshiriqlar yo‘q."},
-                status=status.HTTP_200_OK
-            )
+        # Kunlar kesimida dict
+        counts_by_day = {row["day"]: row["count"] for row in qs}
 
-        monthly_stats = []
-        for week_num in range(1, 5):
-            week_start = first_day_last_month + timedelta(days=(week_num-1)*7)
-            week_end = week_start + timedelta(days=6)
-            if week_end > last_month_last_day:
-                week_end = last_month_last_day
-            count = queryset.filter(completed_at__date__range=[week_start, week_end]).count()
-            monthly_stats.append({
-                "week": week_num,
-                "month": first_day_last_month.strftime("%B"),
-                "count": count
-            })
-        return Response(monthly_stats)
-    
+        # ✅ "oy ichidagi hafta" (1-hafta, 2-hafta, ...) ni Python'da hisoblaymiz
+        total_days = (last_month_last_day - first_day_last_month).days + 1
+        weeks_count = (total_days + 6) // 7  # ceil
+
+        weekly_buckets = [0] * weeks_count  # index 0 -> 1-hafta
+
+        for day, cnt in counts_by_day.items():
+            week_num = ((day - first_day_last_month).days // 7) + 1
+            weekly_buckets[week_num - 1] += cnt
+
+        if sum(weekly_buckets) == 0:
+            return Response({"message": "O‘tgan oyda bajarilgan topshiriqlar yo‘q."}, status=status.HTTP_200_OK)
+
+        month_name = first_day_last_month.strftime("%B")
+        monthly_stats = [
+            {"week": i + 1, "month": month_name, "count": weekly_buckets[i]}
+            for i in range(weeks_count)
+        ]
+
+        return Response(monthly_stats, status=status.HTTP_200_OK)
+
 
 @extend_schema(tags=["Statistika"])
 class YearlyCompleteTaskAPIView(APIView):
@@ -117,33 +136,35 @@ class YearlyCompleteTaskAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        today = now().date()
+
+        today = timezone.localdate()
         last_year = today.year - 1
 
-        queryset = CompleteTask.objects.filter(
-            user=user,
-            completed_at__year=last_year
+        # ✅ 1 ta query: oylar bo'yicha guruhlab sanash
+        qs = (
+            CompleteTask.objects
+            .filter(user=user, completed_at__year=last_year)
+            .annotate(month=TruncMonth("completed_at"))
+            .values("month")
+            .annotate(count=Count("id"))
+            .order_by("month")
         )
 
-        if not queryset.exists():
-            return Response(
-                {"message": "O‘tgan yil bajarilgan topshiriqlar yo‘q."},
-                status=status.HTTP_200_OK
-            )
+        # {'2025-01-01': 10, '2025-02-01': 3, ...} ko'rinishiga keltiramiz
+        counts_by_month = {row["month"].month: row["count"] for row in qs}
 
         yearly_stats = []
         for month_num in range(1, 13):
-            count = queryset.filter(completed_at__month=month_num).count()
-            month_name = calendar.month_name[month_num]
             yearly_stats.append({
-                "month": month_name,
+                "month": calendar.month_name[month_num],
                 "year": last_year,
-                "count": count
+                "count": counts_by_month.get(month_num, 0)
             })
-        return Response(yearly_stats)
 
+        if sum(item["count"] for item in yearly_stats) == 0:
+            return Response({"message": "O‘tgan yil bajarilgan topshiriqlar yo‘q."}, status=status.HTTP_200_OK)
 
-
+        return Response(yearly_stats, status=status.HTTP_200_OK)
 
 
 

@@ -1,13 +1,8 @@
-from dateutil.utils import today
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.views import APIView
-from rest_framework.response import Response
 from django.utils import timezone
-
-from task.serializers import CompleteTaskSerializer
 from task.serializers.complete_task_serializer import TaskCompleteForSerializer
 from task.serializers.task_serializer import ComplatetasTimeSerializer, ListTaskSerializer, TaskSerializer
-from rest_framework.permissions import IsAuthenticated
 from task.models.task import Task
 from task.models.complete_task import CompleteTask
 from accounts.models.profile import Profile
@@ -15,8 +10,6 @@ from accounts.models.rating import Rating
 from django.db import transaction
 from django.db.models import F
 import datetime
-from drf_spectacular.utils import extend_schema
-from rest_framework import generics
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -67,10 +60,14 @@ class AddTaskAPIView(generics.GenericAPIView):
 class ListTaskAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ListTaskSerializer
-    queryset = Task.objects.all()
+
 
     def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
+        return (
+            Task.objects
+            .filter(user=self.request.user)
+            .select_related('title','program')
+        )
 
 
 @extend_schema(tags=["Tasklar ro'yxati"], request=TaskSerializer)

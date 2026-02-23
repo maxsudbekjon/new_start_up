@@ -77,34 +77,8 @@ class UserDetailModelSerializer(serializers.ModelSerializer):
 
 class RatingSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
-    rank = serializers.SerializerMethodField()
+    rank = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Profile
         fields = ['rank', 'username', 'score']
-
-    def get_rank(self, obj):
-        # Serializer context orqali obyektlar ro‘yxatini olish
-        ranked_profiles = self.context.get('ranked_profiles', [])
-        for index, profile in enumerate(ranked_profiles, start=1):
-            if profile.id == obj.id:
-                return index
-        return None
-
-
-
-
-class RatingSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source='user.username')
-    rank = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Profile
-        fields = ['rank', 'username', 'score']
-
-    def get_rank(self, obj):
-        ranked_profiles = self.context.get('ranked_profiles', [])
-        for index, profile in enumerate(ranked_profiles, start=1):
-            if profile.id == obj.id:
-                return index
-        return None

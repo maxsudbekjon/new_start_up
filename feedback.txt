@@ -1,0 +1,36 @@
+complate_view.py ✅
+Muammo: haftalik/oylik/yillik statistikada for sikl ichida .filter().count() ko‘p marta chaqiriladi — bu N+1 query ga olib keladi.
+Yechim: annotate, TruncDate/TruncMonth + Count bilan bitta aggregation query.
+Resume uchun: “Statistika endpointlaridagi N+1 query’larni bitta aggregation query bilan almashtirib, DB yukini kamaytirdim va latency’ni qisqartirdim.”
+
+task_view.py ✅
+Muammo: ListTaskAPIView ListTaskSerializer ichida title.title va program.title/image ishlatiladi, lekin select_related yo‘q — har row uchun qo‘shimcha query bo‘lishi mumkin.
+Yechim: get_queryset() da select_related("title", "program").
+Resume uchun: “Task list API’da select_related qo‘llab N+1 muammosini bartaraf qildim.”
+
+program_view.py
+Muammo: PDF har so‘rovda qayta ochilib o‘qiladi (PyPDF2), random.sample(list(vocabs)) esa barcha vocablarni RAMga yuklaydi.
+Yechim: Kitob matnini oldindan parchalab saqlash yoki cache qilish.
+Vocab tanlashda DB orqali limit/offset yoki random ID strategiyasi.
+Resume uchun: “PDF parsing’ni request time’dan chiqarib, cache/preprocessing orqali I/O vaqtini keskin qisqartirdim.”
+
+task_limits.py
+Muammo: CompleteTask tarixining barchasi Python’da listga olinadi — katta bazada og‘irlashadi.
+Yechim: streak uchun faqat so‘nggi N kun/rekordni olish yoki streak’ni Profileda saqlab borish.
+Resume uchun: “Streak hisoblashni DBga yaqinlashtirib, katta tarixlarda ishlash vaqtini optimallashtirdim.”
+
+views.py + serializers.py
+Muammo: Reytinglar Python’da ko‘p marta for/next() bilan aylanadi (O(n^2)), StreakRatingListView esa har profil uchun alohida query (N+1).
+Yechim:
+
+Rank hisobini Window (DenseRank) bilan DBda qilish.
+annotate(Sum) + select_related bilan profiling.
+Streak’ni oldindan hisoblab saqlash yoki prefetch bilan bir marta olish.
+Resume uchun: “Leaderboard/reytinglarni DB window functions bilan hisoblab, O(n^2)ni O(n)ga tushirdim.”
+serializers.py
+Muammo: RatingSerializer klassi 2 marta takrorlangan. Bu logik xatolarga olib kelishi mumkin.
+Yechim: dublikatni olib tashlash.
+Resume uchun: “Serializer qatlamini tartibga keltirib, dublikat va potentsial xatolarni yo‘qotdim.”
+
+
+
