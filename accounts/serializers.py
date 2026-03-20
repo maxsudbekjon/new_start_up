@@ -78,6 +78,10 @@ class UserDetailModelSerializer(serializers.ModelSerializer):
 class RatingSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     rank = serializers.IntegerField(read_only=True)
+    score = serializers.SerializerMethodField()
+
+    def get_score(self, obj):
+        return getattr(obj, 'monthly_score', obj.score)
 
     class Meta:
         model = Profile

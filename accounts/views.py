@@ -105,9 +105,9 @@ class MonthlyRatingListView(ListAPIView):
             Profile.objects
             .select_related('user')
             .filter(rating__created_at__gte=month_start)
-            .annotate(score=Sum('rating__point', filter=Q(rating__created_at__gte=month_start)))
-            .annotate(rank=Window(expression=DenseRank(), order_by=F('score').desc()))
-            .order_by('-score', 'id')
+            .annotate(monthly_score=Sum('rating__point', filter=Q(rating__created_at__gte=month_start)))
+            .annotate(rank=Window(expression=DenseRank(), order_by=F('monthly_score').desc()))
+            .order_by('-monthly_score', 'id')
         )
 
 
