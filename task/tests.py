@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
-from django.utils import timezone
 from .models import Task, Do, Program
 
 User = get_user_model()
@@ -64,3 +63,63 @@ class AddTaskAPIViewTest(APITestCase):
 
         last_task = Task.objects.last()
         self.assertEqual(last_task.count, 10)  # count streak reset bo‘ldi
+
+
+class AddTaskPerUserProgramLimitTest(APITestCase):
+    def setUp(self):
+        self.url = "/task/add_task/"
+        self.program = Program.objects.create(title="Instagram")
+        self.do = Do.objects.create(title="Read 10 pages")
+
+        self.user = User.objects.create_user(
+            phone="+998900000001",
+            password="password123",
+            username="user-1",
+            age=25,
+        )
+        self.other_user = User.objects.create_user(
+            phone="+998900000002",
+            password="password123",
+            username="user-2",
+            age=25,
+        )
+
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def test_allows_task_when_same_program_belongs_to_other_user(self):
+        Task.objects.create(
+            user=self.other_user,
+            title=self.do,
+            program=self.program,
+            count=5,
+        )
+
+        response = self.client.post(
+            self.url,
+            {"title": self.do.id, "program": self.program.id, "count": 5},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            Task.objects.filter(user=self.user, program=self.program).count(),
+            1,
+        )
+
+    def test_rejects_second_task_for_same_user_and_program(self):
+        Task.objects.create(
+            user=self.user,
+            title=self.do,
+            program=self.program,
+            count=5,
+        )
+
+        response = self.client.post(
+            self.url,
+            {"title": self.do.id, "program": self.program.id, "count": 5},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data["message"], "Bitta ilovaga 1 ta task")

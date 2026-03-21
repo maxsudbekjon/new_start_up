@@ -12,7 +12,7 @@ class TaskLimitResult(NamedTuple):
 
 def validate_task_count(*, user, program, count) -> TaskLimitResult:
     # 1. bitta programga bitta task
-    if Task.objects.filter(program=program).exists():
+    if Task.objects.filter(user=user, program=program).exists():
         return TaskLimitResult(
             allowed=False,
             max_allowed=None,
